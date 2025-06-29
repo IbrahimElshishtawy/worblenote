@@ -1,0 +1,7 @@
+{
+    "cmake.sourceDirectory": "C:/FlutterProjects/noteWorld/wordlenote/worblenote/writdle/linux",
+    "java.project.sourcePaths": [
+        "linux/flutter",
+        "android"
+    ]
+}
