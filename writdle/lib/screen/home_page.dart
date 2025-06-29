@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:writdle/screen/activity_day_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,7 +12,7 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
 
   final List<Widget> pages = const [
-    //  ActivityPage(),
+    ActivityPage(),
     // WordlePage(),
     //  NotesPage(),
     // ProfilePage(),
