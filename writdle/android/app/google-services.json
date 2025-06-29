@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "28297846168",
+    "project_id": "writdle",
+    "storage_bucket": "writdle.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28297846168:android:fb9d8216e8fe06f3c2dfed",
+        "android_client_info": {
+          "package_name": "com.example.writdle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEws1ndVtpzJyWPMypgmqFJ5LgDdQ6kdc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
