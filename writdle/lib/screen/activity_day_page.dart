@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:writdle/screen/task_page.dart';
@@ -21,34 +22,24 @@ class _ActivityPageState extends State<ActivityPage> {
   int _completed = 0;
 
   void _showAddTaskDialog() {
-    showDialog(
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Add New Task'),
-        content: TextField(
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('مهمة جديدة'),
+        content: CupertinoTextField(
           controller: _taskController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Enter your task...',
-            border: OutlineInputBorder(),
-          ),
+          placeholder: 'اكتب المهمة هنا...',
         ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
+            child: const Text('إلغاء'),
             onPressed: () {
               _taskController.clear();
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () async {
               final task = _taskController.text.trim();
               if (task.isNotEmpty) {
@@ -62,7 +53,7 @@ class _ActivityPageState extends State<ActivityPage> {
               _taskController.clear();
               if (mounted) Navigator.pop(context);
             },
-            child: const Text('Add'),
+            child: const Text('إضافة'),
           ),
         ],
       ),
@@ -85,78 +76,68 @@ class _ActivityPageState extends State<ActivityPage> {
         .orderBy('timestamp', descending: true);
   }
 
-  Widget _buildProgressButton() {
+  Widget _buildProgressButton(BuildContext context) {
     double percent = _total == 0 ? 0 : _completed / _total;
-    Color color = Color.lerp(Colors.red, Colors.green, percent)!;
+    final theme = CupertinoTheme.of(context);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: percent == 1.0 ? Colors.green : Colors.deepPurple.shade100,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (_) =>
+                TasksPage(selectedDay: _selectedDay, filter: _filter),
           ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  TasksPage(selectedDay: _selectedDay, filter: _filter),
-            ),
-          );
-        },
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.brightness == Brightness.dark
+              ? CupertinoColors.systemGrey.withOpacity(0.3)
+              : CupertinoColors.systemGrey6,
+          borderRadius: BorderRadius.circular(24),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (percent < 1.0) ...[
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: CircularProgressIndicator(
-                      value: percent,
-                      strokeWidth: 4,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: AlwaysStoppedAnimation(color),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    value: percent,
+                    strokeWidth: 4,
+                    backgroundColor: CupertinoColors.systemGrey4,
+                    valueColor: AlwaysStoppedAnimation(
+                      percent == 1.0 ? Colors.green : Colors.deepPurple,
                     ),
                   ),
-                  Text(
-                    '${(percent * 100).toInt()}%',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                Text(
+                  '${(percent * 100).toInt()}%',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-              const SizedBox(width: 16),
-              const Text(
-                "View Today's Tasks",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ] else ...[
-              const Icon(Icons.celebration, color: Colors.white),
-              const SizedBox(width: 10),
-              const Text(
-                '🎉 Great Job! You did it!',
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                percent == 1.0 ? '🎉 أحسنت! اكتملت المهام' : 'عرض مهام اليوم',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  color: theme.primaryColor,
                 ),
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -165,23 +146,16 @@ class _ActivityPageState extends State<ActivityPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.8,
-        centerTitle: true,
-        title: const Text(
-          'Daily Activity',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: Column(
+    final theme = CupertinoTheme.of(context);
+
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(middle: Text('نشاطك اليومي')),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      child: Column(
         children: [
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           TableCalendar(
-            locale: 'en_US',
+            locale: 'ar_EG',
             firstDay: DateTime.utc(2020),
             lastDay: DateTime.utc(2030),
             focusedDay: _selectedDay,
@@ -192,12 +166,12 @@ class _ActivityPageState extends State<ActivityPage> {
               });
             },
             calendarStyle: CalendarStyle(
-              selectedDecoration: BoxDecoration(
-                color: Colors.deepPurple.shade400,
+              selectedDecoration: const BoxDecoration(
+                color: Colors.deepPurple,
                 shape: BoxShape.circle,
               ),
-              todayDecoration: const BoxDecoration(
-                color: Colors.deepPurpleAccent,
+              todayDecoration: BoxDecoration(
+                color: Colors.deepPurple.shade200,
                 shape: BoxShape.circle,
               ),
               weekendTextStyle: const TextStyle(color: Colors.redAccent),
@@ -207,7 +181,7 @@ class _ActivityPageState extends State<ActivityPage> {
               weekendStyle: TextStyle(color: Colors.redAccent),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           StreamBuilder<QuerySnapshot>(
             stream: _buildQuery().snapshots(),
             builder: (context, snapshot) {
@@ -216,16 +190,19 @@ class _ActivityPageState extends State<ActivityPage> {
                 _total = tasks.length;
                 _completed = tasks.where((doc) => doc['isDone'] == true).length;
               }
-              return _buildProgressButton();
+              return _buildProgressButton(context);
             },
           ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: CupertinoButton.filled(
+              borderRadius: BorderRadius.circular(30),
+              child: const Icon(CupertinoIcons.add),
+              onPressed: _showAddTaskDialog,
+            ),
+          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddTaskDialog,
-        backgroundColor: Colors.deepPurple,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        child: const Icon(Icons.add, size: 30),
       ),
     );
   }

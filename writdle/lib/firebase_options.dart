@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'writdle.firebasestorage.app',
     measurementId: 'G-FE2G7V0YBH',
   );
+
 }

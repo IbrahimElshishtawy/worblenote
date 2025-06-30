@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:writdle/screen/home_page.dart';
+import 'package:writdle/screen/note_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         //  '/wordle': (context) => const WordlePage(),
-        // '/notes': (context) => const NotePage(),
+        '/notes': (context) => const HomePage(),
       },
     );
   }

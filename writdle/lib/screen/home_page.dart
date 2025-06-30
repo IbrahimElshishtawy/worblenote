@@ -1,50 +1,46 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:writdle/screen/activity_day_page.dart';
+import 'package:writdle/screen/note_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int currentIndex = 0;
-
-  final List<Widget> pages = const [
-    ActivityPage(),
-    // WordlePage(),
-    //  NotesPage(),
-    // ProfilePage(),
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(index: currentIndex, children: pages),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
+    return CupertinoTabScaffold(
+      tabBar: CupertinoTabBar(
+        height: 60,
+        backgroundColor: const Color(0xFF1C1C1E), // خلفية غامقة أنيقة
+        activeColor: CupertinoColors.systemPurple,
+        inactiveColor: CupertinoColors.systemGrey2,
+        border: const Border(
+          top: BorderSide(color: Colors.transparent), // بدون حدود مزعجة
+        ),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.directions_run),
+            icon: Icon(CupertinoIcons.sparkles, size: 28),
             label: 'نشاطك',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.videogame_asset),
-            label: 'اللعبة',
+            icon: Icon(CupertinoIcons.square_list, size: 26),
+            label: 'ملاحظات',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.note), label: 'الملاحظات'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'البروفايل'),
         ],
       ),
+      tabBuilder: (context, index) {
+        return CupertinoTabView(
+          builder: (context) {
+            switch (index) {
+              case 0:
+                return const ActivityPage();
+              case 1:
+                return const HomePage();
+              default:
+                return const Center(child: Text('صفحة غير موجودة'));
+            }
+          },
+        );
+      },
     );
   }
 }
