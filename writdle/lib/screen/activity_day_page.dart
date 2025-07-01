@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, sort_child_properties_last
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,7 +18,7 @@ class _ActivityPageState extends State<ActivityPage> {
   final TextEditingController _taskController = TextEditingController();
   final userId = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
   DateTime _selectedDay = DateTime.now();
-  String _filter = 'all';
+  final String _filter = 'all';
 
   int _total = 0;
   int _completed = 0;
@@ -151,58 +153,69 @@ class _ActivityPageState extends State<ActivityPage> {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(middle: Text('نشاطك اليومي')),
       backgroundColor: theme.scaffoldBackgroundColor,
-      child: Column(
-        children: [
-          const SizedBox(height: 12),
-          TableCalendar(
-            locale: 'ar_EG',
-            firstDay: DateTime.utc(2020),
-            lastDay: DateTime.utc(2030),
-            focusedDay: _selectedDay,
-            selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-            onDaySelected: (selectedDay, _) {
-              setState(() {
-                _selectedDay = selectedDay;
-              });
-            },
-            calendarStyle: CalendarStyle(
-              selectedDecoration: const BoxDecoration(
-                color: Colors.deepPurple,
-                shape: BoxShape.circle,
+      child: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Expanded(
+              child: Column(
+                children: [
+                  TableCalendar(
+                    locale: 'ar_EG',
+                    firstDay: DateTime.utc(2020),
+                    lastDay: DateTime.utc(2030),
+                    focusedDay: _selectedDay,
+                    selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+                    onDaySelected: (selectedDay, _) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                      });
+                    },
+                    calendarStyle: CalendarStyle(
+                      selectedDecoration: const BoxDecoration(
+                        color: Colors.deepPurple,
+                        shape: BoxShape.circle,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        color: Colors.deepPurple.shade200,
+                        shape: BoxShape.circle,
+                      ),
+                      weekendTextStyle: const TextStyle(
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                    daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(fontWeight: FontWeight.bold),
+                      weekendStyle: TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: _buildQuery().snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final tasks = snapshot.data!.docs;
+                        _total = tasks.length;
+                        _completed = tasks
+                            .where((doc) => doc['isDone'] == true)
+                            .length;
+                      }
+                      return _buildProgressButton(context);
+                    },
+                  ),
+                ],
               ),
-              todayDecoration: BoxDecoration(
-                color: Colors.deepPurple.shade200,
-                shape: BoxShape.circle,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: CupertinoButton.filled(
+                borderRadius: BorderRadius.circular(30),
+                child: const Icon(CupertinoIcons.add),
+                onPressed: _showAddTaskDialog,
               ),
-              weekendTextStyle: const TextStyle(color: Colors.redAccent),
             ),
-            daysOfWeekStyle: const DaysOfWeekStyle(
-              weekdayStyle: TextStyle(fontWeight: FontWeight.bold),
-              weekendStyle: TextStyle(color: Colors.redAccent),
-            ),
-          ),
-          const SizedBox(height: 12),
-          StreamBuilder<QuerySnapshot>(
-            stream: _buildQuery().snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final tasks = snapshot.data!.docs;
-                _total = tasks.length;
-                _completed = tasks.where((doc) => doc['isDone'] == true).length;
-              }
-              return _buildProgressButton(context);
-            },
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: CupertinoButton.filled(
-              borderRadius: BorderRadius.circular(30),
-              child: const Icon(CupertinoIcons.add),
-              onPressed: _showAddTaskDialog,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
