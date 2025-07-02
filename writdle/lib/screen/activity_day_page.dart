@@ -158,52 +158,56 @@ class _ActivityPageState extends State<ActivityPage> {
           children: [
             const SizedBox(height: 12),
             Expanded(
-              child: Column(
-                children: [
-                  TableCalendar(
-                    locale: 'ar_EG',
-                    firstDay: DateTime.utc(2020),
-                    lastDay: DateTime.utc(2030),
-                    focusedDay: _selectedDay,
-                    selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-                    onDaySelected: (selectedDay, _) {
-                      setState(() {
-                        _selectedDay = selectedDay;
-                      });
-                    },
-                    calendarStyle: CalendarStyle(
-                      selectedDecoration: const BoxDecoration(
-                        color: Colors.deepPurple,
-                        shape: BoxShape.circle,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Column(
+                  children: [
+                    TableCalendar(
+                      locale: 'ar_EG',
+                      firstDay: DateTime.utc(2020),
+                      lastDay: DateTime.utc(2030),
+                      focusedDay: _selectedDay,
+                      selectedDayPredicate: (day) =>
+                          isSameDay(day, _selectedDay),
+                      onDaySelected: (selectedDay, _) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                        });
+                      },
+                      calendarStyle: CalendarStyle(
+                        selectedDecoration: const BoxDecoration(
+                          color: Colors.deepPurple,
+                          shape: BoxShape.circle,
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: Colors.deepPurple.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        weekendTextStyle: const TextStyle(
+                          color: Colors.redAccent,
+                        ),
                       ),
-                      todayDecoration: BoxDecoration(
-                        color: Colors.deepPurple.shade200,
-                        shape: BoxShape.circle,
-                      ),
-                      weekendTextStyle: const TextStyle(
-                        color: Colors.redAccent,
+                      daysOfWeekStyle: const DaysOfWeekStyle(
+                        weekdayStyle: TextStyle(fontWeight: FontWeight.bold),
+                        weekendStyle: TextStyle(color: Colors.redAccent),
                       ),
                     ),
-                    daysOfWeekStyle: const DaysOfWeekStyle(
-                      weekdayStyle: TextStyle(fontWeight: FontWeight.bold),
-                      weekendStyle: TextStyle(color: Colors.redAccent),
+                    const SizedBox(height: 12),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: _buildQuery().snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final tasks = snapshot.data!.docs;
+                          _total = tasks.length;
+                          _completed = tasks
+                              .where((doc) => doc['isDone'] == true)
+                              .length;
+                        }
+                        return _buildProgressButton(context);
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: _buildQuery().snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final tasks = snapshot.data!.docs;
-                        _total = tasks.length;
-                        _completed = tasks
-                            .where((doc) => doc['isDone'] == true)
-                            .length;
-                      }
-                      return _buildProgressButton(context);
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Padding(

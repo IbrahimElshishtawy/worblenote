@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:writdle/screen/activity_day_page.dart';
 import 'package:writdle/screen/note_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -10,12 +11,10 @@ class HomePage extends StatelessWidget {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         height: 60,
-        backgroundColor: const Color(0xFF1C1C1E), // خلفية غامقة أنيقة
+        backgroundColor: const Color(0xFF1C1C1E),
         activeColor: CupertinoColors.systemPurple,
         inactiveColor: CupertinoColors.systemGrey2,
-        border: const Border(
-          top: BorderSide(color: Colors.transparent), // بدون حدود مزعجة
-        ),
+        border: const Border(top: BorderSide(color: Colors.transparent)),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.sparkles, size: 28),
@@ -34,7 +33,7 @@ class HomePage extends StatelessWidget {
               case 0:
                 return const ActivityPage();
               case 1:
-                return const HomePage();
+                return const NotePage();
               default:
                 return const Center(child: Text('صفحة غير موجودة'));
             }

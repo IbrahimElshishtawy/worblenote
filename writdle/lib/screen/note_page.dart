@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:writdle/widget/clander_widget.dart';
 
-class ActivityPage extends StatefulWidget {
-  const ActivityPage({super.key});
+class NotePage extends StatefulWidget {
+  const NotePage({super.key});
 
   @override
-  State<ActivityPage> createState() => _ActivityPageState();
+  State<NotePage> createState() => _NotePageState();
 }
 
-class _ActivityPageState extends State<ActivityPage> {
+class _NotePageState extends State<NotePage> {
   DateTime _selectedDay = DateTime.now();
 
   Widget _buildCalendar() {
@@ -47,7 +47,7 @@ class _ActivityPageState extends State<ActivityPage> {
           weekdayStyle: TextStyle(color: CupertinoColors.systemGrey),
           weekendStyle: TextStyle(color: CupertinoColors.systemGrey),
         ),
-        onDaySelected: (selected, focused) {
+        onDaySelected: (selected, _) {
           setState(() {
             _selectedDay = selected;
           });
@@ -59,8 +59,14 @@ class _ActivityPageState extends State<ActivityPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemBackground,
-      navigationBar: const CupertinoNavigationBar(middle: Text('صفحة التقويم')),
+      backgroundColor: CupertinoColors.black,
+      navigationBar: const CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.black,
+        middle: Text(
+          'ملاحظاتك',
+          style: TextStyle(color: CupertinoColors.white),
+        ),
+      ),
       child: SafeArea(
         child: Column(
           children: [

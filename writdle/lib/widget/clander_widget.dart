@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ClanderWidget extends StatefulWidget {
   final DateTime selectedDay;
@@ -21,8 +22,7 @@ class _ClanderWidgetState extends State<ClanderWidget> {
   }
 
   Stream<QuerySnapshot> _getTasksForDay() {
-    final dateStr =
-        "${_selectedDay.year}-${_selectedDay.month}-${_selectedDay.day}";
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDay);
     return FirebaseFirestore.instance
         .collection('tasks')
         .where('date', isEqualTo: dateStr)
@@ -34,6 +34,7 @@ class _ClanderWidgetState extends State<ClanderWidget> {
     final theme = CupertinoTheme.of(context);
     final textStyle = theme.textTheme.textStyle.copyWith(
       color: CupertinoColors.white,
+      fontSize: 16,
     );
 
     return CupertinoPageScaffold(
@@ -48,12 +49,15 @@ class _ClanderWidgetState extends State<ClanderWidget> {
       child: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
-              "التاريخ: ${_selectedDay.year}-${_selectedDay.month}-${_selectedDay.day}",
-              style: const TextStyle(color: CupertinoColors.white),
+              "📅 التاريخ: ${DateFormat('yyyy-MM-dd').format(_selectedDay)}",
+              style: const TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 18,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             CupertinoSlidingSegmentedControl<bool>(
               groupValue: _showCompleted,
               backgroundColor: CupertinoColors.darkBackgroundGray,
@@ -80,7 +84,7 @@ class _ClanderWidgetState extends State<ClanderWidget> {
                 });
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _getTasksForDay(),
@@ -92,8 +96,11 @@ class _ClanderWidgetState extends State<ClanderWidget> {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return const Center(
                       child: Text(
-                        'لا توجد مهام لهذا اليوم',
-                        style: TextStyle(color: CupertinoColors.systemGrey),
+                        '😴 لا توجد مهام لهذا اليوم',
+                        style: TextStyle(
+                          color: CupertinoColors.systemGrey,
+                          fontSize: 16,
+                        ),
                       ),
                     );
                   }
@@ -106,14 +113,20 @@ class _ClanderWidgetState extends State<ClanderWidget> {
                   if (docs.isEmpty) {
                     return const Center(
                       child: Text(
-                        'لا توجد نتائج مطابقة',
-                        style: TextStyle(color: CupertinoColors.systemGrey),
+                        '🚫 لا توجد نتائج مطابقة',
+                        style: TextStyle(
+                          color: CupertinoColors.systemGrey,
+                          fontSize: 16,
+                        ),
                       ),
                     );
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     itemCount: docs.length,
                     itemBuilder: (context, index) {
                       final doc = docs[index];
@@ -127,7 +140,6 @@ class _ClanderWidgetState extends State<ClanderWidget> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               child: Text(
