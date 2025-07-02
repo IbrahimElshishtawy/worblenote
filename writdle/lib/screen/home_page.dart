@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:writdle/screen/activity_day_page.dart';
-import 'package:writdle/screen/note_page.dart';
+import 'activity_page.dart';
+import 'note_page.dart';
+import 'games_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,35 +10,32 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
-        height: 60,
-        backgroundColor: const Color(0xFF1C1C1E),
-        activeColor: CupertinoColors.systemPurple,
-        inactiveColor: CupertinoColors.systemGrey2,
-        border: const Border(top: BorderSide(color: Colors.transparent)),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.sparkles, size: 28),
-            label: 'نشاطك',
+            icon: Icon(CupertinoIcons.today),
+            label: 'النشاط',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.square_list, size: 26),
+            icon: Icon(CupertinoIcons.pencil),
             label: 'ملاحظات',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.game_controller),
+            label: 'Wordle',
           ),
         ],
       ),
       tabBuilder: (context, index) {
-        return CupertinoTabView(
-          builder: (context) {
-            switch (index) {
-              case 0:
-                return const ActivityPage();
-              case 1:
-                return const NotePage();
-              default:
-                return const Center(child: Text('صفحة غير موجودة'));
-            }
-          },
-        );
+        switch (index) {
+          case 0:
+            return const ActivityPage();
+          case 1:
+            return const NotePage();
+          case 2:
+            return const GamesPage();
+          default:
+            return const Center(child: Text('صفحة غير موجودة'));
+        }
       },
     );
   }
