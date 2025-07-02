@@ -1,6 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:writdle/screen/home_page.dart';
 import 'package:writdle/screen/activity_page.dart';
@@ -8,13 +8,10 @@ import 'package:writdle/screen/note_page.dart';
 import 'package:writdle/screen/games_page.dart';
 import 'package:writdle/screen/clander_widget.dart';
 import 'firebase_options.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await initializeDateFormatting('ar_EG', null); // دعم التقويم بالعربية
-
   runApp(const MyApp());
 }
 
@@ -23,12 +20,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      debugShowCheckedModeBanner: false,
+    return MaterialApp(
       title: 'Writdle App',
-      theme: const CupertinoThemeData(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: CupertinoColors.systemPurple,
+        primarySwatch: Colors.deepPurple,
+        scaffoldBackgroundColor: const Color(0xFF121212),
       ),
       initialRoute: '/',
       routes: {

@@ -1,42 +1,53 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'activity_page.dart';
 import 'note_page.dart';
 import 'games_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = const [
+    ActivityPage(),
+    NotePage(),
+    GamesPage(),
+    Center(child: Text('قريبًا: حسابك', style: TextStyle(fontSize: 18))),
+  ];
+
+  final List<BottomNavigationBarItem> _tabs = const [
+    BottomNavigationBarItem(icon: Icon(Icons.today), label: 'النشاط'),
+    BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'ملاحظات'),
+    BottomNavigationBarItem(icon: Icon(Icons.videogame_asset), label: 'Wordle'),
+    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'حسابي'),
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    return CupertinoTabScaffold(
-      tabBar: CupertinoTabBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.today),
-            label: 'النشاط',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.pencil),
-            label: 'ملاحظات',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.game_controller),
-            label: 'Wordle',
-          ),
-        ],
+    return Scaffold(
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _pages[_currentIndex],
       ),
-      tabBuilder: (context, index) {
-        switch (index) {
-          case 0:
-            return const ActivityPage();
-          case 1:
-            return const NotePage();
-          case 2:
-            return const GamesPage();
-          default:
-            return const Center(child: Text('صفحة غير موجودة'));
-        }
-      },
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (newIndex) {
+          setState(() {
+            _currentIndex = newIndex;
+          });
+        },
+        items: _tabs,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xFF1C1C1E),
+        selectedItemColor: Colors.deepPurpleAccent,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
