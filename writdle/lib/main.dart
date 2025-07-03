@@ -7,7 +7,7 @@ import 'package:writdle/screen/home_page.dart';
 import 'package:writdle/screen/activity_page.dart';
 import 'package:writdle/screen/note_page.dart';
 import 'package:writdle/screen/games_page.dart';
-import 'package:writdle/screen/clander_widget.dart';
+import 'package:writdle/screen/task_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         '/activity': (context) => const ActivityPage(),
         '/notes': (context) => const NotePage(),
         '/games': (context) => const GamesPage(),
-        '/calendar': (context) => ClanderWidget(selectedDay: DateTime.now()),
+        '/calendar': (context) => TasksPage(selectedDay: DateTime.now()),
       },
     );
   }
