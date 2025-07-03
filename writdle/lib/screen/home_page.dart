@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     const ActivityPage(),
-    const NotePage(),
+    const NotesPage(),
     const GamesPage(),
     const Center(child: Text('قريبًا: حسابك', style: TextStyle(fontSize: 18))),
   ];

@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         '/activity': (context) => const ActivityPage(),
-        '/notes': (context) => const NotePage(),
+        '/notes': (context) => const NotesPage(),
         '/games': (context) => const GamesPage(),
         '/calendar': (context) => TasksPage(selectedDay: DateTime.now()),
       },
