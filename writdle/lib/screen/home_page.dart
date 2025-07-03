@@ -13,11 +13,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    ActivityPage(),
-    NotePage(),
-    GamesPage(),
-    Center(child: Text('قريبًا: حسابك', style: TextStyle(fontSize: 18))),
+  final List<Widget> _pages = [
+    const ActivityPage(),
+    const NotePage(),
+    const GamesPage(),
+    const Center(child: Text('قريبًا: حسابك', style: TextStyle(fontSize: 18))),
   ];
 
   final List<BottomNavigationBarItem> _tabs = const [
