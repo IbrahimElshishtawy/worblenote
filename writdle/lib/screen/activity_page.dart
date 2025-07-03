@@ -49,7 +49,10 @@ class _ActivityPageState extends State<ActivityPage> {
     final remaining = totalTasks - completedTasks;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('نشاطك اليومي'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Your daily activity'),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -74,7 +77,7 @@ class _ActivityPageState extends State<ActivityPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'تقدمك اليوم: $completedTasks / $totalTasks',
+              'Your progress today : $completedTasks / $totalTasks',
               style: const TextStyle(fontSize: 16),
             ),
             Padding(
@@ -87,7 +90,7 @@ class _ActivityPageState extends State<ActivityPage> {
               children: [
                 ElevatedButton.icon(
                   icon: const Icon(Icons.task),
-                  label: const Text('مهامك'),
+                  label: const Text('tasks'),
                   onPressed: () {
                     if (_selectedDay != null) {
                       Navigator.push(
@@ -99,13 +102,13 @@ class _ActivityPageState extends State<ActivityPage> {
                     }
                   },
                 ),
-                Text('المتبقي: $remaining'),
+                Text(' residual : $remaining'),
               ],
             ),
             const SizedBox(height: 24),
             if (_uncompletedTasks.isNotEmpty) ...[
               const Text(
-                'المهام المتبقية:',
+                'Remaining tasks :',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -121,7 +124,7 @@ class _ActivityPageState extends State<ActivityPage> {
                 ),
               ),
             ] else ...[
-              const Center(child: Text('لا توجد مهام متبقية لهذا اليوم')),
+              const Center(child: Text('There are no tasks left for today')),
             ],
           ],
         ),
