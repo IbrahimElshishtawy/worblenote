@@ -1,8 +1,7 @@
-// lib/screen/tasks_page.dart
-
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:writdle/widget/task_card.dart';
 
@@ -30,9 +29,13 @@ class _TasksPageState extends State<TasksPage> {
 
   Future<void> _loadTasks() async {
     final dayKey = _formatDate(widget.selectedDay);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
     try {
       final snap = await FirebaseFirestore.instance
           .collection('tasks')
+          .where('uid', isEqualTo: uid)
           .where('date', isEqualTo: dayKey)
           .get();
 
@@ -89,20 +92,25 @@ class _TasksPageState extends State<TasksPage> {
               if (title.isEmpty) return;
               final desc = _descController.text.trim();
               final dayKey = _formatDate(widget.selectedDay);
+              final uid = FirebaseAuth.instance.currentUser?.uid;
+              if (uid == null) return;
+
               try {
                 final col = FirebaseFirestore.instance.collection('tasks');
                 if (doc != null) {
                   await col.doc(doc.id).update({
                     'title': title,
                     'description': desc,
+                    'timestamp': DateTime.now(),
                   });
                 } else {
                   await col.add({
+                    'uid': uid, // ✅ أضفنا معرف المستخدم
                     'title': title,
                     'description': desc,
                     'completed': false,
                     'date': dayKey,
-                    'timestamp': FieldValue.serverTimestamp(),
+                    'timestamp': DateTime.now(),
                   });
                 }
                 Navigator.pop(context);

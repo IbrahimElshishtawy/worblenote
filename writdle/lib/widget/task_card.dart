@@ -20,9 +20,12 @@ class TaskCard extends StatelessWidget {
 
   Future<void> _toggle() async {
     final current = task['completed'] as bool;
+
     await FirebaseFirestore.instance.collection('tasks').doc(task.id).update({
       'completed': !current,
+      'timestamp': DateTime.now(), // ✅ نحدّث وقت الإنجاز لاستخدامه في الشبكة
     });
+
     onToggle();
   }
 

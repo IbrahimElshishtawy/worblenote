@@ -69,7 +69,7 @@ class _WordlePageState extends State<WordlePage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const SizedBox(height: 80),
+              const SizedBox(height: 30),
               Expanded(
                 flex: 2,
                 child: WordleGrid(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:writdle/screen/profile_page.dart';
 import 'activity_page.dart';
 import 'note_page.dart';
 import 'games_page.dart';
@@ -13,13 +14,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const ActivityPage(),
-    const NotesPage(),
-    const WordlePage(),
-    const Center(child: Text('قريبًا: حسابك', style: TextStyle(fontSize: 18))),
-  ];
-
   final List<BottomNavigationBarItem> _tabs = const [
     BottomNavigationBarItem(icon: Icon(Icons.today), label: 'النشاط'),
     BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'ملاحظات'),
@@ -29,10 +23,33 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget currentPage;
+
+    switch (_currentIndex) {
+      case 0:
+        currentPage = const ActivityPage();
+        break;
+      case 1:
+        currentPage = const NotesPage();
+        break;
+      case 2:
+        currentPage = const WordlePage();
+        break;
+      case 3:
+        currentPage = const ProfilePage(
+          totalTasks: 0,
+          completedTasks: 0,
+          completedTaskTitles: [],
+        );
+        break;
+      default:
+        currentPage = const ActivityPage();
+    }
+
     return Scaffold(
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: _pages[_currentIndex],
+        child: currentPage,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
