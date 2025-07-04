@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages, avoid_print
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:writdle/screen/home_page.dart';
 import 'package:writdle/screen/activity_page.dart';
 import 'package:writdle/screen/note_page.dart';
@@ -9,8 +10,8 @@ import 'package:writdle/screen/task_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // استخدم خيارات المنصة بدل Firebase.initializeApp() وحدها
+  WidgetsFlutterBinding.ensureInitialized(); // يجب أن تكون أول سطر
+  await SharedPreferences.getInstance(); // تهيئة التخزين المحلي
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(),
         '/activity': (context) => const ActivityPage(),
         '/notes': (context) => const NotesPage(),
-        '/games': (context) => const GamesPage(),
+        '/games': (context) => const WordlePage(),
         '/calendar': (context) => TasksPage(selectedDay: DateTime.now()),
       },
     );

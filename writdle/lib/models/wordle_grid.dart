@@ -20,18 +20,18 @@ class WordleGrid extends StatelessWidget {
 
             return Container(
               margin: const EdgeInsets.all(4),
-              width: 45,
-              height: 45,
+              width: 55,
+              height: 55,
               decoration: BoxDecoration(
                 color: _getColor(status),
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.white24),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
                 child: Text(
                   letter,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -49,7 +49,7 @@ class WordleGrid extends StatelessWidget {
       case LetterStatus.correct:
         return Colors.green;
       case LetterStatus.present:
-        return Colors.orange;
+        return Colors.amber;
       case LetterStatus.absent:
         return Colors.grey.shade800;
       default:

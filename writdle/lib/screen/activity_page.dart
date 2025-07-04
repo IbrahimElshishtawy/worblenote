@@ -33,6 +33,9 @@ class _ActivityPageState extends State<ActivityPage> {
         .where('date', isEqualTo: formatted)
         .get();
     final docs = snap.docs;
+
+    if (!mounted) return;
+
     setState(() {
       totalTasks = docs.length;
       completedTasks = docs.where((d) => d['completed'] == true).length;
