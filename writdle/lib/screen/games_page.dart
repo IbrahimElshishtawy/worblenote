@@ -5,9 +5,12 @@ import 'package:writdle/models/wordle_game_logic.dart';
 import 'package:writdle/screen/Stats_games_Page.dart';
 import 'package:writdle/widget/keyboard_widget.dart';
 import 'package:writdle/widget/wordle_grid.dart';
+import 'package:writdle/data/game_stats.dart'; // لإرسال البيانات للبروفايل
 
 class WordlePage extends StatefulWidget {
-  const WordlePage({super.key, Null Function()? onGameFinished});
+  final VoidCallback? onGameFinished;
+
+  const WordlePage({super.key, this.onGameFinished});
 
   @override
   State<WordlePage> createState() => _WordlePageState();
@@ -20,7 +23,9 @@ class _WordlePageState extends State<WordlePage> {
   void initState() {
     super.initState();
     game.initGame().then((_) {
+      print('🕹️ Game initialized');
       if (game.gameEnded) {
+        print('⛔ Game already ended. Starting cooldown timer...');
         game.updateCooldownTimer(() => setState(() {}));
       }
       setState(() {});
@@ -30,26 +35,53 @@ class _WordlePageState extends State<WordlePage> {
   @override
   void dispose() {
     game.dispose();
+    print('🧹 Game disposed');
     super.dispose();
   }
 
   void _onKeyTap(String key) async {
-    if (!game.canPlay()) return;
+    if (!game.canPlay()) {
+      print('⛔ Game is not playable now');
+      return;
+    }
 
+    print('⌨️ Key tapped: $key');
     setState(() {
       game.tapKey(key);
     });
 
     if (key == 'ENTER') {
       String guess = game.guesses[game.currentRow];
+      print('📤 Submitting guess: $guess');
+
       if (guess.length == 5) {
         final message = await game.submitGuess(guess);
+
         if (message != null) {
+          print('📢 Result message: $message');
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(message)));
-          setState(() {});
         }
+
+        // ✅ إذا انتهت اللعبة، سجل الإحصائيات
+        if (game.gameEnded) {
+          print('✅ Game ended! Updating stats...');
+          UserStats.updateStats(
+            total: UserStats.totalGames + 1,
+            first: UserStats.winsFirstTry,
+            second: UserStats.winsSecondTry,
+            third: UserStats.winsThirdTry,
+            fourth: UserStats.winsFourthTry,
+            loss: UserStats.losses,
+            completed: 0,
+            titles: [],
+          );
+
+          widget.onGameFinished?.call();
+        }
+
+        setState(() {});
       }
     }
   }
@@ -103,6 +135,7 @@ class _WordlePageState extends State<WordlePage> {
                               ),
                             ),
                             onPressed: () {
+                              print('📊 Opening stats modal');
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -115,7 +148,9 @@ class _WordlePageState extends State<WordlePage> {
                                 builder: (_) => SizedBox(
                                   height:
                                       MediaQuery.of(context).size.height * 0.8,
-                                  child: StatsPage(resultAttempt: 0),
+                                  child: StatsPage(
+                                    resultAttempt: game.resultAttempt,
+                                  ),
                                 ),
                               );
                             },

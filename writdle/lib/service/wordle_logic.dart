@@ -1,11 +1,20 @@
 class WordleLogic {
   final String targetWord;
+  int _currentAttempt = 0;
+  final int _maxAttempts = 6;
+  int _resultAttempt = -1;
 
   WordleLogic(this.targetWord);
+
+  int get resultAttempt => _resultAttempt;
 
   List<String> validateGuess(String guess) {
     if (guess.length != targetWord.length) {
       throw Exception('Guess must be ${targetWord.length} characters long');
+    }
+
+    if (isGameOver) {
+      throw Exception('Game is already over');
     }
 
     List<String> result = [];
@@ -18,10 +27,19 @@ class WordleLogic {
         result.add('absent');
       }
     }
+
+    _currentAttempt++;
+
+    if (isCorrect(guess)) {
+      _resultAttempt = _currentAttempt;
+    } else if (_currentAttempt == _maxAttempts) {
+      _resultAttempt = 0;
+    }
+
     return result;
   }
 
-  bool isCorrect(String guess) {
-    return guess == targetWord;
-  }
+  bool isCorrect(String guess) => guess == targetWord;
+
+  bool get isGameOver => _resultAttempt != -1;
 }

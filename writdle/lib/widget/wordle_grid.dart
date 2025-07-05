@@ -9,14 +9,26 @@ class WordleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🔠 Building WordleGrid...');
+    debugPrint('Guesses: $guesses');
+    debugPrint('Results: $results');
+
+    int numRows = results.length;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(guesses.length, (row) {
+      children: List.generate(numRows, (row) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(5, (col) {
-            final letter = col < guesses[row].length ? guesses[row][col] : '';
+            final letter = col < guesses[row].length
+                ? guesses[row][col].toUpperCase()
+                : '';
             final status = results[row][col];
+
+            debugPrint(
+              '🟦 Row $row, Col $col => Letter: "$letter", Status: $status',
+            );
 
             return Container(
               margin: const EdgeInsets.all(4),

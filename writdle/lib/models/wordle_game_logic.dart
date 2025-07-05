@@ -20,6 +20,9 @@ class WordleGameLogic {
   Duration cooldownLeft = Duration.zero;
   Timer? timer;
 
+  int _attemptResult = -1; // 1–4 للفوز، 0 = خسارة
+  int get resultAttempt => _attemptResult;
+
   Future<void> initGame() async {
     final prefs = await SharedPreferences.getInstance();
     final lastPlayed = prefs.getInt('lastPlayed') ?? 0;
@@ -59,9 +62,7 @@ class WordleGameLogic {
     String currentGuess = guesses[currentRow];
 
     if (key == 'ENTER') {
-      if (currentGuess.length == 5) {
-        // Guess is ready
-      }
+      // handled separately
     } else if (key == 'DEL') {
       if (currentGuess.isNotEmpty) {
         guesses[currentRow] = currentGuess.substring(
@@ -133,8 +134,9 @@ class WordleGameLogic {
     final now = DateTime.now().millisecondsSinceEpoch;
     await prefs.setInt('lastPlayed', now);
 
+    _attemptResult = attempt;
     gameEnded = true;
-    cooldownLeft = const Duration(hours: 18);
+    cooldownLeft = const Duration(hours: 12);
   }
 
   String formatDuration(Duration duration) {
