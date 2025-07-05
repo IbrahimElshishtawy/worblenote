@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> navigateNext() async {
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    Navigator.pushReplacementNamed(context, isLoggedIn ? '/games' : '/login');
+    Navigator.pushReplacementNamed(context, isLoggedIn ? '/home' : '/login');
   }
 
   @override

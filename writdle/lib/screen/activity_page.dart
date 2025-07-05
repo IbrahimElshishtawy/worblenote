@@ -53,7 +53,10 @@ class _ActivityPageState extends State<ActivityPage> {
     });
 
     // تحديث UserStats
-    UserStats.completedTaskTitles = completedTasks as List<String>;
+    final completedTitles = completed
+        .map((doc) => doc['title'] as String)
+        .toList();
+    UserStats.completedTaskTitles = completedTitles;
     UserStats.completedTasks = completedTasks;
     UserStats.completedTaskTitles = completed
         .map((e) => e['title'] as String)
