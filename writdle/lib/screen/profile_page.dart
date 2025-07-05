@@ -6,22 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:writdle/data/game_stats.dart';
 
 class ProfilePage extends StatefulWidget {
-  final int? totalTasks;
-  final int? completedTasks;
-  final List<String>? completedTaskTitles;
-
-  const ProfilePage({
-    super.key,
-    this.totalTasks,
-    this.completedTasks,
-    this.completedTaskTitles,
-    required int winsFirstTry,
-    required int totalGames,
-    required int winsSecondTry,
-    required int winsThirdTry,
-    required int winsFourthTry,
-    required int losses,
-  });
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -47,30 +32,6 @@ class _ProfilePageState extends State<ProfilePage> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => updateTime());
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final args = ModalRoute.of(context)?.settings.arguments;
-
-    if (args is Map) {
-      totalTasks = args['totalTasks'] ?? widget.totalTasks ?? 0;
-      completedTasks = args['completedTasks'] ?? widget.completedTasks ?? 0;
-      completedTaskTitles = List<String>.from(
-        args['completedTaskTitles'] ?? widget.completedTaskTitles ?? [],
-      );
-    } else {
-      totalTasks = widget.totalTasks ?? 0;
-      completedTasks = widget.completedTasks ?? 0;
-      completedTaskTitles = widget.completedTaskTitles ?? [];
-    }
-
-    print('=== ProfilePage Data ===');
-    print('Total Tasks: $totalTasks');
-    print('Completed Tasks: $completedTasks');
-    print('Completed Titles: $completedTaskTitles');
-  }
-
   void updateTime() {
     final now = DateTime.now();
     final formatted = DateFormat('EEEE, MMM d, yyyy – h:mm:ss a').format(now);
@@ -85,18 +46,34 @@ class _ProfilePageState extends State<ProfilePage> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get();
-    if (doc.exists) {
-      final data = doc.data()!;
+    try {
+      // بيانات المستخدم
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      // بيانات المهام
+      final taskSnap = await FirebaseFirestore.instance
+          .collection('tasks')
+          .where('userId', isEqualTo: uid)
+          .get();
+
+      final allTasks = taskSnap.docs;
+      final completed = allTasks.where((t) => t['completed'] == true).toList();
+      final titles = completed.map((e) => e['title'].toString()).toList();
+
       setState(() {
-        userName = data['name'] ?? 'No Name';
-        email = data['email'] ?? 'No Email';
-        rating = data['rating'] ?? 0;
+        userName = doc.data()?['name'] ?? 'No Name';
+        email = doc.data()?['email'] ?? 'No Email';
+        rating = doc.data()?['rating'] ?? 0;
+        totalTasks = allTasks.length;
+        completedTasks = completed.length;
+        completedTaskTitles = titles;
         isLoading = false;
       });
+    } catch (e) {
+      print("Error fetching user/tasks: $e");
     }
   }
 
