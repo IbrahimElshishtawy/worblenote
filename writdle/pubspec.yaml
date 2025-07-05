@@ -32,8 +32,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/image/WR-Logo-1.jpg
+    - assets/icon/w-logo-image_332120.jpg
 
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/icon/w-logo-image_332120.jpg"
+  background_color: "#000000"

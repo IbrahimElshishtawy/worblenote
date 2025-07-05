@@ -1,12 +1,15 @@
-// lib/screen/activity_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:writdle/data/game_stats.dart';
 import 'task_page.dart';
 
 class ActivityPage extends StatefulWidget {
-  const ActivityPage({super.key});
+  final void Function(int total, int completed, List<String> titles)?
+  onStatsUpdated;
+
+  const ActivityPage({super.key, this.onStatsUpdated});
 
   @override
   State<ActivityPage> createState() => _ActivityPageState();
@@ -27,24 +30,45 @@ class _ActivityPageState extends State<ActivityPage> {
   }
 
   Future<void> _fetchTasksForDay(DateTime day) async {
-    final formatted = _formatDate(day);
-    final snap = await FirebaseFirestore.instance
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    final formattedDate = _formatDate(day);
+    final snapshot = await FirebaseFirestore.instance
         .collection('tasks')
-        .where('date', isEqualTo: formatted)
+        .where('userId', isEqualTo: userId)
+        .where('date', isEqualTo: formattedDate)
         .get();
-    final docs = snap.docs;
+
+    final docs = snapshot.docs;
+    final completed = docs.where((d) => d['completed'] == true).toList();
+    final uncompleted = docs.where((d) => d['completed'] == false).toList();
 
     if (!mounted) return;
 
     setState(() {
       totalTasks = docs.length;
-      completedTasks = docs.where((d) => d['completed'] == true).length;
-      _uncompletedTasks = docs.where((d) => d['completed'] == false).toList();
+      completedTasks = completed.length;
+      _uncompletedTasks = uncompleted;
     });
+
+    // تحديث UserStats
+    UserStats.completedTaskTitles = completedTasks as List<String>;
+    UserStats.completedTasks = completedTasks;
+    UserStats.completedTaskTitles = completed
+        .map((e) => e['title'] as String)
+        .toList();
+
+    // إرسال البيانات إلى HomePage
+    widget.onStatsUpdated?.call(
+      totalTasks,
+      completedTasks,
+      UserStats.completedTaskTitles,
+    );
   }
 
-  String _formatDate(DateTime d) =>
-      "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
+  String _formatDate(DateTime date) =>
+      "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +77,7 @@ class _ActivityPageState extends State<ActivityPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your daily activity'),
+        title: const Text('Your Daily Activity'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -66,26 +90,39 @@ class _ActivityPageState extends State<ActivityPage> {
               lastDay: DateTime.utc(2030),
               focusedDay: _focusedDay,
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: (sel, foc) async {
+              onDaySelected: (selectedDay, focusedDay) async {
                 setState(() {
-                  _selectedDay = sel;
-                  _focusedDay = foc;
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
                 });
-                await _fetchTasksForDay(sel);
+                await _fetchTasksForDay(selectedDay);
               },
               headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
               ),
+              calendarStyle: const CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: Colors.deepPurple,
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Colors.purple,
+                  shape: BoxShape.circle,
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             Text(
-              'Your progress today : $completedTasks / $totalTasks',
+              'Your progress today: $completedTasks / $totalTasks',
               style: const TextStyle(fontSize: 16),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: LinearProgressIndicator(value: progress),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey[300],
+              color: Colors.deepPurple,
+              minHeight: 8,
             ),
             const SizedBox(height: 16),
             Row(
@@ -93,7 +130,7 @@ class _ActivityPageState extends State<ActivityPage> {
               children: [
                 ElevatedButton.icon(
                   icon: const Icon(Icons.task),
-                  label: const Text('tasks'),
+                  label: const Text('Tasks'),
                   onPressed: () {
                     if (_selectedDay != null) {
                       Navigator.push(
@@ -105,30 +142,37 @@ class _ActivityPageState extends State<ActivityPage> {
                     }
                   },
                 ),
-                Text(' residual : $remaining'),
+                Text('Remaining: $remaining'),
               ],
             ),
             const SizedBox(height: 24),
-            if (_uncompletedTasks.isNotEmpty) ...[
-              const Text(
-                'Remaining tasks :',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              ..._uncompletedTasks.map(
-                (task) => Card(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: ListTile(
-                    title: Text(task['title']),
-                    subtitle: task['description'] != ''
-                        ? Text(task['description'])
-                        : null,
+            if (_uncompletedTasks.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '📌 Remaining tasks:',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  ..._uncompletedTasks.map(
+                    (task) => Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        title: Text(task['title']),
+                        subtitle:
+                            (task['description'] as String).trim().isNotEmpty
+                            ? Text(task['description'])
+                            : null,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              const Center(
+                child: Text('🎉 There are no tasks left for today!'),
               ),
-            ] else ...[
-              const Center(child: Text('There are no tasks left for today')),
-            ],
           ],
         ),
       ),

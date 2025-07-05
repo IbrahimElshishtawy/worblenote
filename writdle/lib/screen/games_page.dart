@@ -7,7 +7,7 @@ import 'package:writdle/widget/keyboard_widget.dart';
 import 'package:writdle/widget/wordle_grid.dart';
 
 class WordlePage extends StatefulWidget {
-  const WordlePage({super.key});
+  const WordlePage({super.key, Null Function()? onGameFinished});
 
   @override
   State<WordlePage> createState() => _WordlePageState();

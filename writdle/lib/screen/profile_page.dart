@@ -1,21 +1,26 @@
-// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
-
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:writdle/data/game_stats.dart';
 
 class ProfilePage extends StatefulWidget {
-  final int totalTasks;
-  final int completedTasks;
-  final List<String> completedTaskTitles;
+  final int? totalTasks;
+  final int? completedTasks;
+  final List<String>? completedTaskTitles;
 
   const ProfilePage({
     super.key,
-    required this.totalTasks,
-    required this.completedTasks,
-    required this.completedTaskTitles,
+    this.totalTasks,
+    this.completedTasks,
+    this.completedTaskTitles,
+    required int winsFirstTry,
+    required int totalGames,
+    required int winsSecondTry,
+    required int winsThirdTry,
+    required int winsFourthTry,
+    required int losses,
   });
 
   @override
@@ -30,6 +35,10 @@ class _ProfilePageState extends State<ProfilePage> {
   late Timer _timer;
   String currentDateTime = '';
 
+  int totalTasks = 0;
+  int completedTasks = 0;
+  List<String> completedTaskTitles = [];
+
   @override
   void initState() {
     super.initState();
@@ -38,29 +47,53 @@ class _ProfilePageState extends State<ProfilePage> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => updateTime());
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    if (args is Map) {
+      totalTasks = args['totalTasks'] ?? widget.totalTasks ?? 0;
+      completedTasks = args['completedTasks'] ?? widget.completedTasks ?? 0;
+      completedTaskTitles = List<String>.from(
+        args['completedTaskTitles'] ?? widget.completedTaskTitles ?? [],
+      );
+    } else {
+      totalTasks = widget.totalTasks ?? 0;
+      completedTasks = widget.completedTasks ?? 0;
+      completedTaskTitles = widget.completedTaskTitles ?? [];
+    }
+
+    print('=== ProfilePage Data ===');
+    print('Total Tasks: $totalTasks');
+    print('Completed Tasks: $completedTasks');
+    print('Completed Titles: $completedTaskTitles');
+  }
+
   void updateTime() {
     final now = DateTime.now();
     final formatted = DateFormat('EEEE, MMM d, yyyy – h:mm:ss a').format(now);
-    setState(() {
-      currentDateTime = formatted;
-    });
+    if (formatted != currentDateTime) {
+      setState(() {
+        currentDateTime = formatted;
+      });
+    }
   }
 
   Future<void> fetchUserData() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
-    // جلب بيانات المستخدم من Firestore (مثل الاسم والبريد والتقييم)
     final doc = await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .get();
-
     if (doc.exists) {
       final data = doc.data()!;
       setState(() {
-        userName = data['name'] ?? '';
-        email = data['email'] ?? '';
+        userName = data['name'] ?? 'No Name';
+        email = data['email'] ?? 'No Email';
         rating = data['rating'] ?? 0;
         isLoading = false;
       });
@@ -98,9 +131,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget buildStatsTable() {
-    final percentage = widget.totalTasks == 0
+    final percentage = totalTasks == 0
         ? 0
-        : ((widget.completedTasks / widget.totalTasks) * 100).toInt();
+        : ((completedTasks / totalTasks) * 100).toInt();
+    final totalWins = UserStats.totalWins;
+    final totalGames = UserStats.totalGames;
+    final winRate = (UserStats.winRate * 100).toStringAsFixed(1);
 
     return Card(
       color: const Color(0xFF1E1E1E),
@@ -130,21 +166,19 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 buildRow("⭐ Rating", rating.toString()),
                 buildRow("📅 Today", currentDateTime),
-                buildRow("✅ Completed", widget.completedTasks.toString()),
-                buildRow("📝 Total Tasks", widget.totalTasks.toString()),
-                buildRow(
-                  "📈 Progress",
-                  "${widget.totalTasks == 0 ? 0 : percentage}%",
-                ),
+                buildRow("✅ Completed", completedTasks.toString()),
+                buildRow("📝 Total Tasks", totalTasks.toString()),
+                buildRow("📈 Progress", "$percentage%"),
+                buildRow("🎮 Games Played", "$totalGames"),
+                buildRow("🏆 Total Wins", "$totalWins"),
+                buildRow("🥇 Win Rate", "$winRate%"),
               ],
             ),
             const SizedBox(height: 20),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: widget.totalTasks == 0
-                    ? 0
-                    : widget.completedTasks / widget.totalTasks,
+                value: totalTasks == 0 ? 0 : completedTasks / totalTasks,
                 minHeight: 14,
                 backgroundColor: Colors.grey[800],
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
@@ -157,7 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget buildCompletedTaskList() {
-    if (widget.completedTaskTitles.isEmpty) {
+    if (completedTaskTitles.isEmpty) {
       return const Padding(
         padding: EdgeInsets.only(top: 24),
         child: Text(
@@ -181,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           const SizedBox(height: 12),
-          ...widget.completedTaskTitles.map(
+          ...completedTaskTitles.map(
             (title) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
@@ -233,11 +267,19 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 50),
-                  const CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.deepPurple,
-                    child: Icon(Icons.person, size: 50, color: Colors.white),
+                  const SizedBox(height: 40),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.deepPurple, width: 3),
+                    ),
+                    padding: const EdgeInsets.all(3),
+                    child: const CircleAvatar(
+                      radius: 55,
+                      backgroundImage: AssetImage(
+                        "assets/icon/w-logo-image_332120.jpg",
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
