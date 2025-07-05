@@ -38,4 +38,4 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/icon/w-logo-image_332120.jpg"
-  background_color: "#000000"
+  background_color: "#000000FF"

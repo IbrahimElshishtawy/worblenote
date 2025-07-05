@@ -35,7 +35,7 @@ class _TasksPageState extends State<TasksPage> {
     try {
       final snap = await FirebaseFirestore.instance
           .collection('tasks')
-          .where('uid', isEqualTo: uid)
+          .where('userId', isEqualTo: uid) // ✅ تم التعديل هنا
           .where('date', isEqualTo: dayKey)
           .get();
 
@@ -47,8 +47,9 @@ class _TasksPageState extends State<TasksPage> {
       });
 
       setState(() => _tasks = docs);
+      debugPrint('📥 Loaded ${docs.length} task(s) for $dayKey');
     } catch (e) {
-      debugPrint('loadTasks ERROR: $e');
+      debugPrint('❌ loadTasks ERROR: $e');
     }
   }
 
@@ -103,20 +104,22 @@ class _TasksPageState extends State<TasksPage> {
                     'description': desc,
                     'timestamp': DateTime.now(),
                   });
+                  debugPrint('✏️ Task updated: $title');
                 } else {
                   await col.add({
-                    'uid': uid, // ✅ أضفنا معرف المستخدم
+                    'userId': uid, // ✅ تم التعديل هنا
                     'title': title,
                     'description': desc,
                     'completed': false,
                     'date': dayKey,
                     'timestamp': DateTime.now(),
                   });
+                  debugPrint('🆕 Task added: $title');
                 }
                 Navigator.pop(context);
                 await _loadTasks();
               } catch (e) {
-                debugPrint('add/edit ERROR: $e');
+                debugPrint('❌ add/edit ERROR: $e');
               }
             },
           ),

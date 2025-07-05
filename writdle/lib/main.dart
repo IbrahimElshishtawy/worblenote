@@ -8,7 +8,6 @@ import 'package:writdle/screen/Splash_Screen_page.dart';
 import 'package:writdle/screen/home_page.dart';
 import 'package:writdle/screen/login_page.dart';
 import 'package:writdle/screen/register_page.dart';
-import 'package:writdle/screen/profile_page.dart';
 import 'package:writdle/screen/activity_page.dart';
 import 'package:writdle/screen/note_page.dart';
 import 'package:writdle/screen/games_page.dart';
@@ -39,7 +38,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/profile': (context) => const ProfilePage(),
         '/activity': (context) => const ActivityPage(),
         '/notes': (context) => const NotesPage(),
         '/games': (context) => const WordlePage(),

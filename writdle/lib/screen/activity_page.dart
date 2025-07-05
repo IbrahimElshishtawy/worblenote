@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,14 +28,20 @@ class _ActivityPageState extends State<ActivityPage> {
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
+    print('📅 Initial day selected: $_selectedDay');
     _fetchTasksForDay(_selectedDay!);
   }
 
   Future<void> _fetchTasksForDay(DateTime day) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return;
+    if (userId == null) {
+      print('❌ No user logged in');
+      return;
+    }
 
     final formattedDate = _formatDate(day);
+    print('📤 Fetching tasks for date: $formattedDate');
+
     final snapshot = await FirebaseFirestore.instance
         .collection('tasks')
         .where('userId', isEqualTo: userId)
@@ -44,6 +52,10 @@ class _ActivityPageState extends State<ActivityPage> {
     final completed = docs.where((d) => d['completed'] == true).toList();
     final uncompleted = docs.where((d) => d['completed'] == false).toList();
 
+    print('📥 Total tasks: ${docs.length}');
+    print('✅ Completed: ${completed.length}');
+    print('❗ Uncompleted: ${uncompleted.length}');
+
     if (!mounted) return;
 
     setState(() {
@@ -52,22 +64,17 @@ class _ActivityPageState extends State<ActivityPage> {
       _uncompletedTasks = uncompleted;
     });
 
-    // تحديث UserStats
     final completedTitles = completed
         .map((doc) => doc['title'] as String)
         .toList();
-    UserStats.completedTaskTitles = completedTitles;
-    UserStats.completedTasks = completedTasks;
-    UserStats.completedTaskTitles = completed
-        .map((e) => e['title'] as String)
-        .toList();
+    print('🎯 Completed Task Titles: $completedTitles');
 
-    // إرسال البيانات إلى HomePage
-    widget.onStatsUpdated?.call(
-      totalTasks,
-      completedTasks,
-      UserStats.completedTaskTitles,
-    );
+    // Update global stats
+    UserStats.completedTasks = completedTasks;
+    UserStats.completedTaskTitles = completedTitles;
+
+    // Send data to HomePage
+    widget.onStatsUpdated?.call(totalTasks, completedTasks, completedTitles);
   }
 
   String _formatDate(DateTime date) =>
@@ -77,6 +84,10 @@ class _ActivityPageState extends State<ActivityPage> {
   Widget build(BuildContext context) {
     final progress = totalTasks == 0 ? 0.0 : completedTasks / totalTasks;
     final remaining = totalTasks - completedTasks;
+
+    print(
+      '📊 Rendering UI - progress: ${(progress * 100).toStringAsFixed(1)}%',
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -94,6 +105,7 @@ class _ActivityPageState extends State<ActivityPage> {
               focusedDay: _focusedDay,
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               onDaySelected: (selectedDay, focusedDay) async {
+                print('📆 Day selected: $selectedDay');
                 setState(() {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
@@ -135,6 +147,7 @@ class _ActivityPageState extends State<ActivityPage> {
                   icon: const Icon(Icons.task),
                   label: const Text('Tasks'),
                   onPressed: () {
+                    print('📥 Navigating to TasksPage for $_selectedDay');
                     if (_selectedDay != null) {
                       Navigator.push(
                         context,
@@ -158,8 +171,9 @@ class _ActivityPageState extends State<ActivityPage> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  ..._uncompletedTasks.map(
-                    (task) => Card(
+                  ..._uncompletedTasks.map((task) {
+                    print('📋 Remaining Task: ${task['title']}');
+                    return Card(
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       child: ListTile(
                         title: Text(task['title']),
@@ -168,8 +182,8 @@ class _ActivityPageState extends State<ActivityPage> {
                             ? Text(task['description'])
                             : null,
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               )
             else
