@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:writdle/data/game_stats.dart';
+import 'package:writdle/data/user_stats.dart';
 import 'task_page.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -94,103 +94,115 @@ class _ActivityPageState extends State<ActivityPage> {
         title: const Text('Your Daily Activity'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TableCalendar(
-              firstDay: DateTime.utc(2020),
-              lastDay: DateTime.utc(2030),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: (selectedDay, focusedDay) async {
-                print('📆 Day selected: $selectedDay');
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                await _fetchTasksForDay(selectedDay);
-              },
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-              ),
-              calendarStyle: const CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: Colors.deepPurple,
-                  shape: BoxShape.circle,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          if (_selectedDay != null) {
+            await _fetchTasksForDay(_selectedDay!);
+          }
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TableCalendar(
+                firstDay: DateTime.utc(2020),
+                lastDay: DateTime.utc(2030),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onDaySelected: (selectedDay, focusedDay) async {
+                  print('📆 Day selected: $selectedDay');
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                  await _fetchTasksForDay(selectedDay);
+                },
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
                 ),
-                selectedDecoration: BoxDecoration(
-                  color: Colors.purple,
-                  shape: BoxShape.circle,
+                calendarStyle: const CalendarStyle(
+                  todayDecoration: BoxDecoration(
+                    color: Colors.deepPurple,
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Colors.purple,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Your progress today: $completedTasks / $totalTasks',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey[300],
-              color: Colors.deepPurple,
-              minHeight: 8,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.task),
-                  label: const Text('Tasks'),
-                  onPressed: () {
-                    print('📥 Navigating to TasksPage for $_selectedDay');
-                    if (_selectedDay != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => TasksPage(selectedDay: _selectedDay!),
+              const SizedBox(height: 16),
+              Text(
+                'Your progress today: $completedTasks / $totalTasks',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.grey[300],
+                color: Colors.deepPurple,
+                minHeight: 8,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.task),
+                    label: const Text('Tasks'),
+                    onPressed: () {
+                      print('📥 Navigating to TasksPage for $_selectedDay');
+                      if (_selectedDay != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                TasksPage(selectedDay: _selectedDay!),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  Text('Remaining: $remaining'),
+                ],
+              ),
+              const SizedBox(height: 24),
+              if (_uncompletedTasks.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '📌 Remaining tasks:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ..._uncompletedTasks.map((task) {
+                      print('📋 Remaining Task: ${task['title']}');
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: ListTile(
+                          title: Text(task['title']),
+                          subtitle:
+                              (task['description'] as String).trim().isNotEmpty
+                              ? Text(task['description'])
+                              : null,
                         ),
                       );
-                    }
-                  },
+                    }),
+                  ],
+                )
+              else
+                const Center(
+                  child: Text('🎉 There are no tasks left for today!'),
                 ),
-                Text('Remaining: $remaining'),
-              ],
-            ),
-            const SizedBox(height: 24),
-            if (_uncompletedTasks.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '📌 Remaining tasks:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  ..._uncompletedTasks.map((task) {
-                    print('📋 Remaining Task: ${task['title']}');
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      child: ListTile(
-                        title: Text(task['title']),
-                        subtitle:
-                            (task['description'] as String).trim().isNotEmpty
-                            ? Text(task['description'])
-                            : null,
-                      ),
-                    );
-                  }),
-                ],
-              )
-            else
-              const Center(
-                child: Text('🎉 There are no tasks left for today!'),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

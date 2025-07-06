@@ -4,11 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class StatsPage extends StatelessWidget {
+class StatsPage extends StatefulWidget {
   final int resultAttempt; // 1, 2, 3, 4 or 0 if failed
 
   const StatsPage({super.key, required this.resultAttempt});
 
+  @override
+  State<StatsPage> createState() => _StatsPageState();
+}
+
+class _StatsPageState extends State<StatsPage> {
   Future<List<int>> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
     return [
@@ -18,6 +23,17 @@ class StatsPage extends StatelessWidget {
       prefs.getInt('win4') ?? 0,
       prefs.getInt('fail') ?? 0,
     ];
+  }
+
+  Future<void> _resetStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('win1');
+    await prefs.remove('win2');
+    await prefs.remove('win3');
+    await prefs.remove('win4');
+    await prefs.remove('fail');
+
+    setState(() {}); // إعادة تحميل البيانات بعد الحذف
   }
 
   @override
@@ -56,6 +72,47 @@ class StatsPage extends StatelessWidget {
           "Today's Statistics",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+            tooltip: 'Reset statistics',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  backgroundColor: const Color(0xFF1E1E1E),
+                  title: const Text(
+                    "Reset Statistics",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  content: const Text(
+                    "Are you sure you want to reset all statistics?",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _resetStats();
+                      },
+                      child: const Text(
+                        "Reset",
+                        style: TextStyle(color: Colors.redAccent),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<int>>(
         future: _loadStats(),
@@ -72,7 +129,7 @@ class StatsPage extends StatelessWidget {
               ? 0
               : (totalWins / totalGames * 100).round();
 
-          return Padding(
+          return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +160,6 @@ class StatsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 const Divider(color: Colors.grey),
                 const SizedBox(height: 10),
 
@@ -136,8 +192,9 @@ class StatsPage extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
 
-                const Spacer(),
+                const SizedBox(height: 16),
 
+                /// ✅ زر العودة
                 Center(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
@@ -160,6 +217,7 @@ class StatsPage extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 30),
               ],
             ),

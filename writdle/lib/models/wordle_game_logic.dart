@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:writdle/models/word_generator_time.dart';
+import 'package:writdle/service/game_stats_service.dart';
 
 enum LetterStatus { correct, present, absent, initial }
 
@@ -21,7 +22,7 @@ class WordleGameLogic {
   Duration cooldownLeft = Duration.zero;
   Timer? timer;
 
-  int _attemptResult = -1; // 1–4 للفوز، 0 = خسارة
+  int _attemptResult = -1;
   int get resultAttempt => _attemptResult;
 
   Future<void> initGame() async {
@@ -46,7 +47,7 @@ class WordleGameLogic {
         timer?.cancel();
       } else {
         cooldownLeft -= const Duration(seconds: 1);
-        callback(); // to trigger UI update
+        callback();
       }
     });
   }
@@ -62,8 +63,8 @@ class WordleGameLogic {
 
     String currentGuess = guesses[currentRow];
 
-    if (key == 'ENTER') {
-      // handled separately
+    if (key == 'EN') {
+      evaluateGuess(currentGuess);
     } else if (key == 'DEL') {
       if (currentGuess.isNotEmpty) {
         guesses[currentRow] = currentGuess.substring(
@@ -128,12 +129,14 @@ class WordleGameLogic {
 
   Future<void> _endGame(int attempt) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = attempt == 0 ? 'fail' : 'win$attempt';
-    final count = prefs.getInt(key) ?? 0;
-    await prefs.setInt(key, count + 1);
+    await prefs.setInt('lastPlayed', DateTime.now().millisecondsSinceEpoch);
 
-    final now = DateTime.now().millisecondsSinceEpoch;
-    await prefs.setInt('lastPlayed', now);
+    // ✅ استخدام GameStatsService بدلًا من prefs مباشر
+    final statsService = GameStatsService();
+    await statsService.incrementGame(
+      isWin: attempt > 0,
+      tryNumber: attempt > 0 ? attempt : null,
+    );
 
     _attemptResult = attempt;
     gameEnded = true;
@@ -145,5 +148,12 @@ class WordleGameLogic {
     final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
     final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
     return "$hours:$minutes:$seconds";
+  }
+
+  void evaluateGuess(String guess) {
+    // فقط مساعده لو نسيتها
+    //    if (guess.length != 5) {
+    //      return;
+    // }
   }
 }

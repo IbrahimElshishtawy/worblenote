@@ -26,10 +26,6 @@ class WordleGrid extends StatelessWidget {
                 : '';
             final status = results[row][col];
 
-            debugPrint(
-              '🟦 Row $row, Col $col => Letter: "$letter", Status: $status',
-            );
-
             return Container(
               margin: const EdgeInsets.all(4),
               width: 45,

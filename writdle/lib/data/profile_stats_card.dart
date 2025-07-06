@@ -1,21 +1,16 @@
-// lib/widget/profile_stats_card.dart
 import 'package:flutter/material.dart';
 
 class ProfileStatsCard extends StatelessWidget {
-  final int rating;
   final int completedTasks;
   final int totalTasks;
-  final int totalGames;
   final int losses;
   final double progress;
   final double winRate;
 
   const ProfileStatsCard({
     super.key,
-    required this.rating,
     required this.completedTasks,
     required this.totalTasks,
-    required this.totalGames,
     required this.losses,
     required this.progress,
     required this.winRate,
@@ -63,14 +58,12 @@ class ProfileStatsCard extends StatelessWidget {
                 1: FlexColumnWidth(3),
               },
               children: [
-                buildRow("⭐ Rating", rating.toString()),
                 buildRow("✅ Completed", completedTasks.toString()),
                 buildRow("📝 Total Tasks", totalTasks.toString()),
                 buildRow(
                   "📈 Progress",
                   "${(progress * 100).toStringAsFixed(0)}%",
                 ),
-                buildRow("🎮 Games Played", totalGames.toString()),
               ],
             ),
             const SizedBox(height: 20),

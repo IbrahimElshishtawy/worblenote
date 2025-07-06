@@ -6,7 +6,7 @@ import 'package:writdle/screen/Stats_games_Page.dart';
 import 'package:writdle/service/game_stats_service.dart';
 import 'package:writdle/widget/keyboard_widget.dart';
 import 'package:writdle/widget/wordle_grid.dart';
-import 'package:writdle/data/game_stats.dart'; // لإرسال البيانات للبروفايل
+import 'package:writdle/data/user_stats.dart'; // لإرسال البيانات للبروفايل
 
 class WordlePage extends StatefulWidget {
   final VoidCallback? onGameFinished;
@@ -125,7 +125,7 @@ class _WordlePageState extends State<WordlePage> {
                 flex: 3,
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 90.0),
+                    padding: const EdgeInsets.only(top: 70.0),
                     child: Column(
                       children: [
                         KeyboardWidget(

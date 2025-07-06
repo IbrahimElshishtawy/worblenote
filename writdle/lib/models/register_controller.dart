@@ -53,7 +53,7 @@ class RegisterController {
     if (result == null) {
       Navigator.pushReplacementNamed(context, '/games');
     } else {
-      errorMessage = result;
+      errorMessage = result.message; // ✅ تم التعديل هنا
     }
 
     isLoading = false;

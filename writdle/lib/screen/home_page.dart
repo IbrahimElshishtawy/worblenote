@@ -3,7 +3,7 @@ import 'package:writdle/screen/profile_page.dart';
 import 'activity_page.dart';
 import 'note_page.dart';
 import 'games_page.dart';
-import 'package:writdle/data/game_stats.dart';
+import 'package:writdle/data/user_stats.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -120,16 +120,7 @@ class _HomePageState extends State<HomePage> {
         print('  losses: $losses');
         print('  weeklyWordsCompleted: ${completedTasks * 50}');
 
-        currentPage = ProfilePage(
-          completedTasks: completedTasks,
-          completedTaskTitles: completedTaskTitles,
-          winsFirstTry: winsFirstTry,
-          winsSecondTry: winsSecondTry,
-          winsThirdTry: winsThirdTry,
-          winsFourthTry: winsFourthTry,
-          losses: losses,
-          weeklyWordsCompleted: completedTasks * 50,
-        );
+        currentPage = ProfilePage();
         break;
 
       default:

@@ -74,7 +74,7 @@ class KeyboardWidget extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildKey('ENTER', flex: 2),
+            _buildKey('EN', flex: 2),
 
             ...row3.split('').map((e) => _buildKey(e)).toList(),
             _buildKey('DEL', flex: 2),

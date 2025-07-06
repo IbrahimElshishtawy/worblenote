@@ -45,7 +45,7 @@ class LoginLogic {
 
     isLoading = false;
     if (result == null) {
-      Navigator.pushReplacementNamed(context!, '/');
+      Navigator.pushReplacementNamed(context!, '/home');
     } else {
       errorMessage = result;
       (context as Element).markNeedsBuild();

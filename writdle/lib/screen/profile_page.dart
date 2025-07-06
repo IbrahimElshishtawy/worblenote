@@ -3,28 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:writdle/data/profile_stats_card.dart';
 import 'package:writdle/models/profile_logic.dart';
+import 'package:writdle/data/user_stats.dart'; // علشان UserStats
 
 class ProfilePage extends StatefulWidget {
-  final int completedTasks;
-  final List<String> completedTaskTitles;
-  final int winsFirstTry;
-  final int winsSecondTry;
-  final int winsThirdTry;
-  final int winsFourthTry;
-  final int losses;
-  final int weeklyWordsCompleted;
-
-  const ProfilePage({
-    super.key,
-    required this.completedTasks,
-    required this.completedTaskTitles,
-    required this.winsFirstTry,
-    required this.winsSecondTry,
-    required this.winsThirdTry,
-    required this.winsFourthTry,
-    required this.losses,
-    required this.weeklyWordsCompleted,
-  });
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -35,27 +17,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   String userName = '';
   String email = '';
-  int rating = 0;
   String currentDateTime = '';
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-
-    // ✅ طباعة البيانات المستلمة من HomePage
-    print('=== Received Data in ProfilePage ===');
-    print('completedTasks: ${widget.completedTasks}');
-    print('completedTaskTitles: ${widget.completedTaskTitles}');
-    print('winsFirstTry: ${widget.winsFirstTry}');
-    print('winsSecondTry: ${widget.winsSecondTry}');
-    print('winsThirdTry: ${widget.winsThirdTry}');
-    print('winsFourthTry: ${widget.winsFourthTry}');
-    print('losses: ${widget.losses}');
-    print('weeklyWordsCompleted: ${widget.weeklyWordsCompleted}');
-    print('====================================');
-
-    _loadUserData();
+    _initProfile();
 
     logic.startClock((time) {
       if (!mounted) return;
@@ -63,27 +31,24 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  Future<void> _loadUserData() async {
+  Future<void> _initProfile() async {
     setState(() => isLoading = true);
-    print('⏳ Fetching user data...');
+
+    print('📦 Loading data from Firestore...');
+    await UserStats.loadFromFirestore();
+
+    print('📦 Loaded from Firestore:');
+    print('UserStats.completedTasks = ${UserStats.completedTasks}');
+    print('UserStats.completedTaskTitles = ${UserStats.completedTaskTitles}');
+
     logic.fetchUserData((name, mail, _) {
       if (!mounted) return;
-      print('✅ User data loaded:');
-      print('Name: $name, Email: $mail');
-
       setState(() {
         userName = name;
         email = mail;
-        rating = _calculateRating();
         isLoading = false;
       });
     });
-  }
-
-  int _calculateRating() {
-    final rating = (widget.weeklyWordsCompleted / 500).clamp(0, 5).round();
-    print('⭐ Calculated rating: $rating');
-    return rating;
   }
 
   @override
@@ -94,26 +59,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final totalGames =
-        widget.winsFirstTry +
-        widget.winsSecondTry +
-        widget.winsThirdTry +
-        widget.winsFourthTry +
-        widget.losses;
-
     final totalWins =
-        widget.winsFirstTry +
-        widget.winsSecondTry +
-        widget.winsThirdTry +
-        widget.winsFourthTry;
+        UserStats.winsFirstTry +
+        UserStats.winsSecondTry +
+        UserStats.winsThirdTry +
+        UserStats.winsFourthTry;
 
-    final winRate = logic.calculateWinRate(totalWins, totalGames);
+    final winRate = logic.calculateWinRate(totalWins, UserStats.totalGames);
     final progress = logic.calculateProgress(
-      widget.completedTasks,
-      widget.completedTasks,
+      UserStats.completedTasks,
+      UserStats.completedTasks,
     );
-
-    print('📊 Win Rate: $winRate%, Progress: $progress%');
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -131,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: _loadUserData,
+              onRefresh: _initProfile,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(24),
@@ -171,13 +127,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 6),
                     Text(email, style: const TextStyle(color: Colors.white70)),
 
-                    /// 🧠 الإحصائيات
+                    /// 🧠 الإحصائيات بدون rating و totalGames
                     ProfileStatsCard(
-                      rating: rating,
-                      completedTasks: widget.completedTasks,
-                      totalTasks: widget.completedTasks,
-                      totalGames: totalGames,
-                      losses: widget.losses,
+                      completedTasks: UserStats.completedTasks,
+                      totalTasks: UserStats.completedTasks,
+                      losses: UserStats.losses,
                       progress: progress,
                       winRate: winRate,
                     ),
@@ -185,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 24),
 
                     /// ✅ المهام المكتملة
-                    if (widget.completedTaskTitles.isNotEmpty)
+                    if (UserStats.completedTaskTitles.isNotEmpty)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -198,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          ...widget.completedTaskTitles.map(
+                          ...UserStats.completedTaskTitles.map(
                             (title) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Row(
