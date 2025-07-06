@@ -2,12 +2,13 @@
 
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:writdle/models/word_generator.dart';
+import 'package:writdle/models/word_generator_time.dart';
 
 enum LetterStatus { correct, present, absent, initial }
 
 class WordleGameLogic {
   late String correctWord;
+  bool get didWin => _attemptResult > 0;
   final List<String> guesses = List.filled(4, '');
   final List<List<LetterStatus>> results = List.generate(
     4,
@@ -35,7 +36,7 @@ class WordleGameLogic {
       cooldownLeft = Duration(milliseconds: cooldownDuration - passedTime);
     } else {
       correctWord = WordGenerator.getWordOfTheDay();
-      print("🔤 Today's Word: $correctWord");
+      print("🔤###### Today's Word: $correctWord ##############");
     }
   }
 

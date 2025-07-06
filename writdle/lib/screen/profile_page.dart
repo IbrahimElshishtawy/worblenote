@@ -43,7 +43,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+
     logic.fetchUserData((name, mail, rate) {
+      if (!mounted) return;
       setState(() {
         userName = name;
         email = mail;
@@ -51,7 +53,9 @@ class _ProfilePageState extends State<ProfilePage> {
         isLoading = false;
       });
     });
+
     logic.startClock((time) {
+      if (!mounted) return;
       setState(() => currentDateTime = time);
     });
   }
@@ -134,10 +138,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     completedTasks: completedTasks,
                     totalTasks: totalTasks,
                     totalGames: totalGames,
-                    winsFirstTry: widget.winsFirstTry,
-                    winsSecondTry: widget.winsSecondTry,
-                    winsThirdTry: widget.winsThirdTry,
-                    winsFourthTry: widget.winsFourthTry,
                     losses: widget.losses,
                     progress: progress,
                     winRate: winRate,

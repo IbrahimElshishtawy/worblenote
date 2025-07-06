@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
 import 'package:writdle/screen/Splash_Screen_page.dart';
 import 'package:writdle/screen/home_page.dart';
 import 'package:writdle/screen/login_page.dart';

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:writdle/models/wordle_game_logic.dart';
 import 'package:writdle/screen/Stats_games_Page.dart';
+import 'package:writdle/service/game_stats_service.dart';
 import 'package:writdle/widget/keyboard_widget.dart';
 import 'package:writdle/widget/wordle_grid.dart';
 import 'package:writdle/data/game_stats.dart'; // لإرسال البيانات للبروفايل
@@ -18,6 +19,7 @@ class WordlePage extends StatefulWidget {
 
 class _WordlePageState extends State<WordlePage> {
   final WordleGameLogic game = WordleGameLogic();
+  final GameStatsService statsService = GameStatsService(); // ✅ جديد
 
   @override
   void initState() {
@@ -64,9 +66,9 @@ class _WordlePageState extends State<WordlePage> {
           ).showSnackBar(SnackBar(content: Text(message)));
         }
 
-        // ✅ إذا انتهت اللعبة، سجل الإحصائيات
         if (game.gameEnded) {
           print('✅ Game ended! Updating stats...');
+
           UserStats.updateStats(
             total: UserStats.totalGames + 1,
             first: UserStats.winsFirstTry,
@@ -77,6 +79,15 @@ class _WordlePageState extends State<WordlePage> {
             completed: 0,
             titles: [],
           );
+
+          if (game.didWin) {
+            await statsService.incrementGame(
+              isWin: true,
+              tryNumber: game.resultAttempt,
+            );
+          } else {
+            await statsService.incrementGame(isWin: false);
+          }
 
           widget.onGameFinished?.call();
         }

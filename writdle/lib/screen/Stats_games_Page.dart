@@ -65,22 +65,48 @@ class StatsPage extends StatelessWidget {
           }
 
           final values = snapshot.data!;
-          final total = values.fold(0, (sum, val) => sum + val);
+          final totalGames = values.fold(0, (sum, val) => sum + val);
+          final totalWins = values.sublist(0, 4).reduce((a, b) => a + b);
+          final totalFails = values[4];
+          final winRate = totalGames == 0
+              ? 0
+              : (totalWins / totalGames * 100).round();
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Your Results:",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                Text(
+                  "Total Games Played: $totalGames",
+                  style: const TextStyle(fontSize: 18, color: Colors.white70),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "✅ Total Wins: $totalWins",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.greenAccent,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 6),
+                Text(
+                  "❌ Total Failures: $totalFails",
+                  style: const TextStyle(fontSize: 18, color: Colors.redAccent),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "📊 Win Rate: $winRate%",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.lightBlueAccent,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                const Divider(color: Colors.grey),
+                const SizedBox(height: 10),
+
                 for (int i = 0; i < labels.length; i++) ...[
                   Row(
                     children: [
@@ -99,7 +125,7 @@ class StatsPage extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: LinearProgressIndicator(
-                      value: total == 0 ? 0 : values[i] / total,
+                      value: totalGames == 0 ? 0 : values[i] / totalGames,
                       minHeight: 18,
                       backgroundColor: Colors.grey.shade800,
                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -109,7 +135,9 @@ class StatsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                 ],
+
                 const Spacer(),
+
                 Center(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
