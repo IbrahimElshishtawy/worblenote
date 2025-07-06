@@ -15,11 +15,11 @@ import 'package:writdle/screen/task_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(Writdle());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Writdle extends StatelessWidget {
+  const Writdle({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -131,7 +131,6 @@ class WordleGameLogic {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('lastPlayed', DateTime.now().millisecondsSinceEpoch);
 
-    // ✅ استخدام GameStatsService بدلًا من prefs مباشر
     final statsService = GameStatsService();
     await statsService.incrementGame(
       isWin: attempt > 0,
@@ -150,10 +149,13 @@ class WordleGameLogic {
     return "$hours:$minutes:$seconds";
   }
 
-  void evaluateGuess(String guess) {
-    // فقط مساعده لو نسيتها
-    //    if (guess.length != 5) {
-    //      return;
-    // }
+  // ✅ الدالة المفعّلة الآن
+  void evaluateGuess(String guess) async {
+    if (guess.length != 5) return;
+
+    final message = await submitGuess(guess);
+    if (message != null) {
+      print(message); // أو استخدم Snackbar لعرض الرسالة في الواجهة
+    }
   }
 }
