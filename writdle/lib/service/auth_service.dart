@@ -39,7 +39,6 @@ class AuthService {
 
       return null; // ✅ Success
     } on FirebaseAuthException catch (e) {
-      // حذف الحساب إذا أنشئ بنجاح ثم فشل الحفظ
       if (e.code == 'email-already-in-use') {
         return AuthResult(
           code: 'email-already-in-use',
@@ -65,15 +64,6 @@ class AuthService {
         message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
       );
     }
-    final strongRegex = RegExp(
-      r'^(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~])[A-Za-z\d!@#\$&*~]{8,}$',
-    );
-    if (!strongRegex.hasMatch(pass)) {
-      return AuthResult(
-        code: 'weak-password',
-        message: 'لابد أن تحتوي على حرف كبير، رقم، ورمز خاص',
-      );
-    }
     return null;
   }
 }
@@ -82,5 +72,6 @@ class AuthService {
 class AuthResult {
   final String code;
   final String message;
+
   AuthResult({required this.code, required this.message});
 }

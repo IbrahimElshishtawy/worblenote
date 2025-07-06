@@ -78,11 +78,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     () => controller.toggleConfirmPasswordVisibility(),
                   ),
                   isMatch: controller.isPasswordMatched,
-                  onChanged: (value) {
-                    setState(() {
-                      controller.checkPasswordMatch();
-                    });
-                  },
+                  onChanged: (value) => setState(() {
+                    controller.checkPasswordMatch();
+                  }),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(

@@ -51,9 +51,9 @@ class RegisterController {
     );
 
     if (result == null) {
-      Navigator.pushReplacementNamed(context, '/games');
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      errorMessage = result.message; // ✅ تم التعديل هنا
+      errorMessage = result.message;
     }
 
     isLoading = false;

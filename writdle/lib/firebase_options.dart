@@ -46,6 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '28297846168',
     projectId: 'writdle',
     authDomain: 'writdle.firebaseapp.com',
+    databaseURL: 'https://writdle-default-rtdb.firebaseio.com',
     storageBucket: 'writdle.firebasestorage.app',
     measurementId: 'G-WQ9P14Y1ZL',
   );
@@ -55,6 +56,7 @@ class DefaultFirebaseOptions {
     appId: '1:28297846168:android:fb9d8216e8fe06f3c2dfed',
     messagingSenderId: '28297846168',
     projectId: 'writdle',
+    databaseURL: 'https://writdle-default-rtdb.firebaseio.com',
     storageBucket: 'writdle.firebasestorage.app',
   );
 
@@ -63,6 +65,7 @@ class DefaultFirebaseOptions {
     appId: '1:28297846168:ios:5e9ddc26fc7e52d3c2dfed',
     messagingSenderId: '28297846168',
     projectId: 'writdle',
+    databaseURL: 'https://writdle-default-rtdb.firebaseio.com',
     storageBucket: 'writdle.firebasestorage.app',
     iosBundleId: 'com.example.writdle',
   );
@@ -72,6 +75,7 @@ class DefaultFirebaseOptions {
     appId: '1:28297846168:ios:5e9ddc26fc7e52d3c2dfed',
     messagingSenderId: '28297846168',
     projectId: 'writdle',
+    databaseURL: 'https://writdle-default-rtdb.firebaseio.com',
     storageBucket: 'writdle.firebasestorage.app',
     iosBundleId: 'com.example.writdle',
   );
@@ -82,6 +86,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '28297846168',
     projectId: 'writdle',
     authDomain: 'writdle.firebaseapp.com',
+    databaseURL: 'https://writdle-default-rtdb.firebaseio.com',
     storageBucket: 'writdle.firebasestorage.app',
     measurementId: 'G-FE2G7V0YBH',
   );

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "28297846168",
+    "firebase_url": "https://writdle-default-rtdb.firebaseio.com",
     "project_id": "writdle",
     "storage_bucket": "writdle.firebasestorage.app"
   },
