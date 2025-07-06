@@ -43,6 +43,15 @@ class _HomePageState extends State<HomePage> {
       winsThirdTry = UserStats.winsThirdTry;
       winsFourthTry = UserStats.winsFourthTry;
       losses = UserStats.losses;
+
+      // 🟣 طباعة بيانات الألعاب
+      print('🟣 Game Stats Updated From Global:');
+      print('  totalGames: $totalGames');
+      print('  winsFirstTry: $winsFirstTry');
+      print('  winsSecondTry: $winsSecondTry');
+      print('  winsThirdTry: $winsThirdTry');
+      print('  winsFourthTry: $winsFourthTry');
+      print('  losses: $losses');
     });
   }
 
@@ -77,6 +86,12 @@ class _HomePageState extends State<HomePage> {
               completedTasks = completed;
               completedTaskTitles = titles;
 
+              // 🟢 طباعة بيانات المهام
+              print('🟢 Task Stats Updated:');
+              print('  totalTasks: $total');
+              print('  completedTasks: $completed');
+              print('  completedTaskTitles: $titles');
+
               // تحديث الإحصائيات العامة
               UserStats.updateStats(
                 total: totalGames,
@@ -94,16 +109,26 @@ class _HomePageState extends State<HomePage> {
         break;
 
       case 3:
+        // 🔵 طباعة القيم المرسلة إلى صفحة البروفايل
+        print('🔵 Navigating to ProfilePage with:');
+        print('  completedTasks: $completedTasks');
+        print('  completedTaskTitles: $completedTaskTitles');
+        print('  winsFirstTry: $winsFirstTry');
+        print('  winsSecondTry: $winsSecondTry');
+        print('  winsThirdTry: $winsThirdTry');
+        print('  winsFourthTry: $winsFourthTry');
+        print('  losses: $losses');
+        print('  weeklyWordsCompleted: ${completedTasks * 50}');
+
         currentPage = ProfilePage(
-          totalTasks: totalTasks,
           completedTasks: completedTasks,
           completedTaskTitles: completedTaskTitles,
-          totalGames: totalGames,
           winsFirstTry: winsFirstTry,
           winsSecondTry: winsSecondTry,
           winsThirdTry: winsThirdTry,
           winsFourthTry: winsFourthTry,
           losses: losses,
+          weeklyWordsCompleted: completedTasks * 50,
         );
         break;
 
