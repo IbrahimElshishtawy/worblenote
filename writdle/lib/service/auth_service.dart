@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // ✅ تأكد إنك ضايف ده
 
 class AuthService {
   /// نتيجة موحّدة: إما نجاح (null) أو كود خطأ ورسالة
@@ -15,14 +16,18 @@ class AuthService {
     if (passCheck != null) return passCheck;
 
     try {
-      // 2) إنشاء الحساب
+      // ✅ 2) امسح أي بيانات قديمة محفوظة
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // 3) إنشاء الحساب
       UserCredential cred = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // 3) إرسال رسالة تفعيل
+      // 4) إرسال رسالة تفعيل
       await cred.user!.sendEmailVerification();
 
-      // 4) كتابة بيانات Firestore داخل Batch
+      // 5) كتابة بيانات Firestore داخل Batch
       WriteBatch batch = FirebaseFirestore.instance.batch();
       DocumentReference userDoc = FirebaseFirestore.instance
           .collection('users')
@@ -36,6 +41,11 @@ class AuthService {
       });
 
       await batch.commit();
+
+      // ✅ 6) حفظ بيانات المستخدم الجديد في SharedPreferences (اختياري)
+      await prefs.setString('uid', cred.user!.uid);
+      await prefs.setString('email', email);
+      await prefs.setString('name', name);
 
       return null; // ✅ Success
     } on FirebaseAuthException catch (e) {
