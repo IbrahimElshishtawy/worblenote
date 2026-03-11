@@ -3,40 +3,50 @@
 import 'package:flutter/material.dart';
 import 'package:writdle/service/auth_service.dart';
 
-class RegisterController {
+class RegisterController with ChangeNotifier {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  bool isLoading = false;
-  String? errorMessage;
-  bool isPasswordMatched = true;
+  bool _isLoading = false;
+  String? _errorMessage;
+  bool _isPasswordMatched = true;
 
-  bool showPassword = false;
-  bool showConfirmPassword = false;
+  bool _showPassword = false;
+  bool _showConfirmPassword = false;
+
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  bool get isPasswordMatched => _isPasswordMatched;
+  bool get showPassword => _showPassword;
+  bool get showConfirmPassword => _showConfirmPassword;
 
   void togglePasswordVisibility() {
-    showPassword = !showPassword;
+    _showPassword = !_showPassword;
+    notifyListeners();
   }
 
   void toggleConfirmPasswordVisibility() {
-    showConfirmPassword = !showConfirmPassword;
+    _showConfirmPassword = !_showConfirmPassword;
+    notifyListeners();
   }
 
   void checkPasswordMatch() {
-    isPasswordMatched =
+    _isPasswordMatched =
         confirmPasswordController.text.trim() == passwordController.text.trim();
   }
 
   Future<void> registerUser(BuildContext context) async {
-    isLoading = true;
-    errorMessage = null;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
     checkPasswordMatch();
 
-    if (!isPasswordMatched) {
-      errorMessage = "Passwords do not match";
-      isLoading = false;
+    if (!_isPasswordMatched) {
+      _errorMessage = "Passwords do not match";
+      _isLoading = false;
+      notifyListeners();
       return;
     }
 
@@ -53,10 +63,11 @@ class RegisterController {
     if (result == null) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      errorMessage = result.message;
+      _errorMessage = result.message;
     }
 
-    isLoading = false;
+    _isLoading = false;
+    notifyListeners();
   }
 
   void disposeControllers() {
@@ -64,5 +75,6 @@ class RegisterController {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    super.dispose();
   }
 }

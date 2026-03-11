@@ -1,10 +1,8 @@
-// lib/widgets/note_list.dart
-
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:writdle/providers/notes_provider.dart';
+import 'package:writdle/service/notification_service.dart';
 
 class NoteList extends StatefulWidget {
   final String date;
@@ -20,10 +18,26 @@ class _NoteListState extends State<NoteList> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
 
-  Future<void> _showNoteDialog({DocumentSnapshot? note}) async {
-    if (note != null) {
-      _titleController.text = note['title'];
-      _descController.text = note['description'];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotesProvider>().fetchNotes(widget.date);
+    });
+  }
+
+  @override
+  void didUpdateWidget(NoteList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.date != widget.date) {
+      context.read<NotesProvider>().fetchNotes(widget.date);
+    }
+  }
+
+  Future<void> _showNoteDialog({String? id, String? currentTitle, String? currentDesc}) async {
+    if (id != null) {
+      _titleController.text = currentTitle ?? '';
+      _descController.text = currentDesc ?? '';
     } else {
       _titleController.clear();
       _descController.clear();
@@ -32,7 +46,7 @@ class _NoteListState extends State<NoteList> {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(note != null ? 'Edit Note' : 'Add Note'),
+        title: Text(id != null ? 'Edit Note' : 'Add Note'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -40,6 +54,7 @@ class _NoteListState extends State<NoteList> {
               controller: _titleController,
               decoration: const InputDecoration(labelText: 'Note Title'),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: _descController,
               decoration: const InputDecoration(
@@ -61,23 +76,16 @@ class _NoteListState extends State<NoteList> {
               final desc = _descController.text.trim();
               if (title.isEmpty) return;
 
-              final col = FirebaseFirestore.instance.collection('notes');
-              if (note != null) {
-                await col.doc(note.id).update({
-                  'title': title,
-                  'description': desc,
-                });
+              final notesProvider = context.read<NotesProvider>();
+              if (id != null) {
+                await notesProvider.updateNote(id, title, desc, widget.date);
+                if (mounted) NotificationService.showSnackBar(context, "Note updated!");
               } else {
-                await col.add({
-                  'title': title,
-                  'description': desc,
-                  'timestamp': FieldValue.serverTimestamp(),
-                  'date': widget.date,
-                });
+                await notesProvider.addNote(title, desc, widget.date);
+                if (mounted) NotificationService.showSnackBar(context, "Note added!");
               }
 
-              Navigator.pop(context);
-              setState(() {});
+              if (mounted) Navigator.pop(context);
             },
           ),
         ],
@@ -85,74 +93,48 @@ class _NoteListState extends State<NoteList> {
     );
   }
 
-  Future<void> _deleteNote(String id) async {
-    await FirebaseFirestore.instance.collection('notes').doc(id).delete();
-    setState(() {});
-  }
-
-  String _formatDate(Timestamp? ts) {
-    if (ts == null) return '';
-    final date = ts.toDate();
-    return DateFormat('yyyy/MM/dd – hh:mm a').format(date);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('notes')
-              .where('date', isEqualTo: widget.date)
-              .orderBy('timestamp', descending: true)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return Consumer<NotesProvider>(
+      builder: (context, notesProvider, child) {
+        if (notesProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-            final notes = snapshot.data?.docs ?? [];
-            final filteredNotes = notes.where((note) {
-              final title = (note['title'] ?? '').toLowerCase();
-              final desc = (note['description'] ?? '').toLowerCase();
-              return title.contains(widget.searchQuery.toLowerCase()) ||
-                  desc.contains(widget.searchQuery.toLowerCase());
-            }).toList();
+        final filteredNotes = notesProvider.notes.where((note) {
+          return note.title.toLowerCase().contains(widget.searchQuery.toLowerCase()) ||
+              note.content.toLowerCase().contains(widget.searchQuery.toLowerCase());
+        }).toList();
 
-            if (filteredNotes.isEmpty) {
-              return const Center(child: Text('No notes for this day.'));
-            }
+        if (filteredNotes.isEmpty) {
+          return const Center(child: Text('No notes for this day.'));
+        }
 
-            return ListView.builder(
+        return Stack(
+          children: [
+            ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: filteredNotes.length,
               itemBuilder: (_, index) {
                 final note = filteredNotes[index];
                 return Card(
-                  elevation: 3,
                   margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                   child: ListTile(
                     title: Text(
-                      note['title'],
+                      note.title,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if ((note['description'] ?? '').isNotEmpty)
+                        if (note.content.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
-                            child: Text(note['description']),
+                            child: Text(note.content),
                           ),
                         Text(
-                          _formatDate(note['timestamp']),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          DateFormat('hh:mm a').format(note.createdAt),
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -161,29 +143,36 @@ class _NoteListState extends State<NoteList> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showNoteDialog(note: note),
+                          onPressed: () => _showNoteDialog(
+                            id: note.id,
+                            currentTitle: note.title,
+                            currentDesc: note.content,
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteNote(note.id),
+                          onPressed: () async {
+                            await notesProvider.deleteNote(note.id, widget.date);
+                            if (mounted) NotificationService.showSnackBar(context, "Note deleted");
+                          },
                         ),
                       ],
                     ),
                   ),
                 );
               },
-            );
-          },
-        ),
-        Positioned(
-          bottom: 20,
-          right: 20,
-          child: FloatingActionButton(
-            onPressed: () => _showNoteDialog(),
-            child: const Icon(Icons.add),
-          ),
-        ),
-      ],
+            ),
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: FloatingActionButton(
+                onPressed: () => _showNoteDialog(),
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
