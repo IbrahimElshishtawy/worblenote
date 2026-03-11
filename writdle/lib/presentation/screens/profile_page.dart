@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:writdle/data/profile_stats_card.dart';
-import 'package:writdle/models/profile_logic.dart';
+import 'package:writdle/domain/entities/profile_logic.dart';
 import 'package:writdle/data/user_stats.dart'; // علشان UserStats
 
 class ProfilePage extends StatefulWidget {

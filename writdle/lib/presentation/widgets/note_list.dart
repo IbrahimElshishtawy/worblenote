@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:writdle/providers/notes_provider.dart';
-import 'package:writdle/service/notification_service.dart';
+import 'package:writdle/presentation/providers/notes_provider.dart';
+import 'package:writdle/data/datasources/notification_service.dart';
 
 class NoteList extends StatefulWidget {
   final String date;

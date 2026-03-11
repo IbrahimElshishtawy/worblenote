@@ -1,7 +1,7 @@
 // ignore_for_file: unnecessary_to_list_in_spreads
 
 import 'package:flutter/material.dart';
-import 'package:writdle/models/wordle_game_logic.dart';
+import 'package:writdle/domain/entities/wordle_game_logic.dart';
 
 class KeyboardWidget extends StatelessWidget {
   final Map<String, LetterStatus> keyStatus;

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:writdle/models/note_model.dart';
-import 'package:writdle/models/task_model.dart';
-import 'package:writdle/models/wordle_model.dart';
+import 'package:writdle/domain/entities/note_model.dart';
+import 'package:writdle/domain/entities/task_model.dart';
+import 'package:writdle/domain/entities/wordle_model.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;

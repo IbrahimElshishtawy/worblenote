@@ -1,7 +1,7 @@
 // lib/screen/notes_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:writdle/widget/note_list.dart';
+import 'package:writdle/presentation/widgets/note_list.dart';
 
 class NotesPage extends StatefulWidget {
   final DateTime? selectedDay;

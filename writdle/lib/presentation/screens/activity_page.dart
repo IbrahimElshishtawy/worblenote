@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
-import 'package:writdle/providers/tasks_provider.dart';
-import 'package:writdle/providers/user_stats_provider.dart';
+import 'package:writdle/presentation/providers/tasks_provider.dart';
+import 'package:writdle/presentation/providers/user_stats_provider.dart';
 import 'task_page.dart';
 
 class ActivityPage extends StatefulWidget {

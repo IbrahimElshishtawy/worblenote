@@ -1,11 +1,11 @@
 // ignore_for_file: use_build_context_synchronously, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:writdle/models/wordle_game_logic.dart';
-import 'package:writdle/screen/Stats_games_Page.dart';
-import 'package:writdle/service/game_stats_service.dart';
-import 'package:writdle/widget/keyboard_widget.dart';
-import 'package:writdle/widget/wordle_grid.dart';
+import 'package:writdle/domain/entities/wordle_game_logic.dart';
+import 'package:writdle/presentation/screens/Stats_games_Page.dart';
+import 'package:writdle/data/datasources/game_stats_service.dart';
+import 'package:writdle/presentation/widgets/keyboard_widget.dart';
+import 'package:writdle/presentation/widgets/wordle_grid.dart';
 import 'package:writdle/data/user_stats.dart'; // لإرسال البيانات للبروفايل
 
 class WordlePage extends StatefulWidget {

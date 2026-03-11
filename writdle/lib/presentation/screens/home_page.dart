@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:writdle/providers/user_stats_provider.dart';
-import 'package:writdle/screen/profile_page.dart';
+import 'package:writdle/presentation/providers/user_stats_provider.dart';
+import 'package:writdle/presentation/screens/profile_page.dart';
 import 'activity_page.dart';
 import 'note_page.dart';
 import 'games_page.dart';
