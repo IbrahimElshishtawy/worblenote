@@ -3,7 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:writdle/widget/task_card.dart';
+import 'package:writdle/presentation/widgets/task_card.dart';
 
 class TasksPage extends StatefulWidget {
   final DateTime selectedDay;

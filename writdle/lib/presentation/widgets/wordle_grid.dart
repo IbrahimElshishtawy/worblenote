@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:writdle/models/wordle_game_logic.dart';
+import 'package:writdle/domain/entities/wordle_game_logic.dart';
 
 class WordleGrid extends StatelessWidget {
   final List<List<String>> guesses;

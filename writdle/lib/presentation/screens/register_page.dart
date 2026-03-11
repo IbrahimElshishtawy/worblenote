@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:writdle/controllers/register_controller.dart';
-import 'package:writdle/service/notification_service.dart';
+import 'package:writdle/domain/repositories/auth_repository.dart';
+import 'package:writdle/presentation/providers/register_controller.dart';
+import 'package:writdle/data/datasources/notification_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -16,7 +17,8 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
-    _controller = RegisterController();
+    final authRepository = context.read<IAuthRepository>();
+    _controller = RegisterController(authRepository);
   }
 
   @override

@@ -2,8 +2,8 @@
 
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:writdle/models/word_generator_time.dart';
-import 'package:writdle/service/game_stats_service.dart';
+import 'package:writdle/domain/entities/word_generator_time.dart';
+import 'package:writdle/data/datasources/game_stats_service.dart';
 
 enum LetterStatus { correct, present, absent, initial }
 

@@ -1,9 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:writdle/service/auth_service.dart';
+import 'package:writdle/domain/repositories/auth_repository.dart';
 
 class RegisterController with ChangeNotifier {
+  final IAuthRepository _repository;
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -15,6 +16,8 @@ class RegisterController with ChangeNotifier {
 
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+
+  RegisterController(this._repository);
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -54,16 +57,11 @@ class RegisterController with ChangeNotifier {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    final result = await AuthService.registerUser(
-      name: name,
-      email: email,
-      password: password,
-    );
-
-    if (result == null) {
+    try {
+      await _repository.register(name, email, password);
       Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      _errorMessage = result.message;
+    } catch (e) {
+      _errorMessage = e.toString();
     }
 
     _isLoading = false;

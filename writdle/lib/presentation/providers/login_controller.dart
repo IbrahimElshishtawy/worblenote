@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:writdle/providers/auth_provider.dart';
+import 'package:writdle/domain/repositories/auth_repository.dart';
+import 'package:writdle/presentation/providers/auth_provider.dart';
 
 class LoginController with ChangeNotifier {
+  final IAuthRepository _repository;
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   bool _isLoading = false;
   bool _showPassword = false;
   String? _errorMessage;
+
+  LoginController(this._repository);
 
   bool get isLoading => _isLoading;
   bool get showPassword => _showPassword;
@@ -34,8 +38,7 @@ class LoginController with ChangeNotifier {
       return false;
     }
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final result = await authProvider.login(email, password);
+    final result = await _repository.login(email, password);
 
     if (result == null) {
       _isLoading = false;
