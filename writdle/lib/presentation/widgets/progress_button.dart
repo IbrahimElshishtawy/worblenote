@@ -19,7 +19,7 @@ class ProgressButton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: theme.brightness == Brightness.dark
-              ? CupertinoColors.systemGrey.withOpacity(0.3)
+              ? CupertinoColors.systemGrey.withValues(alpha: 0.3)
               : CupertinoColors.systemGrey6,
           borderRadius: BorderRadius.circular(24),
         ),

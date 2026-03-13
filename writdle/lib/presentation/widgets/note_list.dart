@@ -206,7 +206,7 @@ class _NoteListState extends State<NoteList> {
               right: 20,
               bottom: 20,
               child: FloatingActionButton(
-                onPressed: _showNoteDialog,
+                onPressed: () => _showNoteDialog(),
                 child: const Icon(Icons.add),
               ),
             ),

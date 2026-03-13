@@ -193,7 +193,7 @@ class _TasksPageState extends State<TasksPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddEditDialog,
+        onPressed: () => _showAddEditDialog(),
         child: const Icon(Icons.add),
       ),
     );

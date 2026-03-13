@@ -59,6 +59,8 @@ class Writdle extends StatelessWidget {
   final INoteRepository noteRepository;
   final ITaskRepository taskRepository;
   final IProfileRepository profileRepository;
+  static final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +82,11 @@ class Writdle extends StatelessWidget {
           ),
         ],
         child: AppNotificationListener(
+          scaffoldMessengerKey: _scaffoldMessengerKey,
           child: MaterialApp(
             title: 'Writdle App',
             debugShowCheckedModeBanner: false,
+            scaffoldMessengerKey: _scaffoldMessengerKey,
             theme: ThemeData(
               useMaterial3: true,
               brightness: Brightness.dark,
