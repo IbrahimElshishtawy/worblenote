@@ -79,8 +79,12 @@ class Writdle extends StatelessWidget {
           BlocProvider(create: (_) => AppNotificationCubit()),
           BlocProvider(create: (_) => AuthCubit(authRepository)),
           BlocProvider(create: (_) => NotesCubit(noteRepository)),
-          BlocProvider(create: (_) => TasksCubit(taskRepository, profileRepository)),
-          BlocProvider(create: (_) => ProfileCubit(profileRepository, authRepository)),
+          BlocProvider(
+            create: (_) => TasksCubit(taskRepository, profileRepository),
+          ),
+          BlocProvider(
+            create: (_) => ProfileCubit(profileRepository, authRepository),
+          ),
         ],
         child: AppNotificationListener(
           scaffoldMessengerKey: _scaffoldMessengerKey,
