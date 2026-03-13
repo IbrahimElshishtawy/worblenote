@@ -129,7 +129,8 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
                           physics: const NeverScrollableScrollPhysics(),
-                          childAspectRatio: 1.18,
+                          childAspectRatio:
+                              MediaQuery.of(context).size.width > 760 ? 1.08 : 0.96,
                           children: [
                             StatCard(
                               label: 'Completed',

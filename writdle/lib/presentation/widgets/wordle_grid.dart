@@ -15,41 +15,59 @@ class WordleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(results.length, (row) {
-        return Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width;
+        final tileSize = ((availableWidth - 40) / 5).clamp(36.0, 50.0);
+        final spacing = tileSize >= 46 ? 5.0 : 3.0;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(5, (col) {
-            final letter = col < guesses[row].length ? guesses[row][col].toUpperCase() : '';
-            final status = results[row][col];
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              margin: const EdgeInsets.all(5),
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: _getColor(status),
-                border: Border.all(
-                  color: status == LetterStatus.initial
-                      ? Theme.of(context).colorScheme.outlineVariant
-                      : _getColor(status),
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  letter,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+          children: List.generate(results.length, (row) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: spacing * 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (col) {
+                  final letter = col < guesses[row].length
+                      ? guesses[row][col].toUpperCase()
+                      : '';
+                  final status = results[row][col];
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    margin: EdgeInsets.all(spacing),
+                    width: tileSize,
+                    height: tileSize,
+                    decoration: BoxDecoration(
+                      color: _getColor(status),
+                      border: Border.all(
+                        color: status == LetterStatus.initial
+                            ? Theme.of(context).colorScheme.outlineVariant
+                            : _getColor(status),
                       ),
-                ),
+                      borderRadius: BorderRadius.circular(tileSize * 0.24),
+                    ),
+                    child: Center(
+                      child: FittedBox(
+                        child: Text(
+                          letter,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
               ),
             );
           }),
         );
-      }),
+      },
     );
   }
 
