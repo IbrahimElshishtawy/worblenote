@@ -13,6 +13,7 @@ import 'package:writdle/domain/repositories/note_repository.dart';
 import 'package:writdle/domain/repositories/profile_repository.dart';
 import 'package:writdle/domain/repositories/task_repository.dart';
 import 'package:writdle/firebase_options.dart';
+import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 import 'package:writdle/presentation/bloc/auth_cubit.dart';
 import 'package:writdle/presentation/bloc/notes_cubit.dart';
 import 'package:writdle/presentation/bloc/profile_cubit.dart';
@@ -25,6 +26,7 @@ import 'package:writdle/presentation/screens/home_page.dart';
 import 'package:writdle/presentation/screens/login_page.dart';
 import 'package:writdle/presentation/screens/note_page.dart';
 import 'package:writdle/presentation/screens/register_page.dart';
+import 'package:writdle/presentation/screens/settings_page.dart';
 import 'package:writdle/presentation/screens/task_page.dart';
 import 'package:writdle/presentation/widgets/app_notification_listener.dart';
 
@@ -76,37 +78,48 @@ class Writdle extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => ThemeCubit()),
+          BlocProvider(create: (_) => AppSettingsCubit()),
           BlocProvider(create: (_) => AppNotificationCubit()),
           BlocProvider(create: (_) => AuthCubit(authRepository)),
           BlocProvider(create: (_) => NotesCubit(noteRepository)),
-          BlocProvider(
-            create: (_) => TasksCubit(taskRepository, profileRepository),
-          ),
-          BlocProvider(
-            create: (_) => ProfileCubit(profileRepository, authRepository),
-          ),
+          BlocProvider(create: (_) => TasksCubit(taskRepository, profileRepository)),
+          BlocProvider(create: (_) => ProfileCubit(profileRepository, authRepository)),
         ],
         child: AppNotificationListener(
           scaffoldMessengerKey: _scaffoldMessengerKey,
           child: BlocBuilder<ThemeCubit, ThemeMode>(
             builder: (context, themeMode) {
-              return MaterialApp(
-                title: 'Writdle App',
-                debugShowCheckedModeBanner: false,
-                scaffoldMessengerKey: _scaffoldMessengerKey,
-                theme: AppTheme.light(),
-                darkTheme: AppTheme.dark(),
-                themeMode: themeMode,
-                initialRoute: '/splash',
-                routes: {
-                  '/splash': (_) => const SplashScreen(),
-                  '/home': (_) => const HomePage(),
-                  '/login': (_) => const LoginPage(),
-                  '/register': (_) => const RegisterPage(),
-                  '/activity': (_) => const ActivityPage(),
-                  '/notes': (_) => const NotesPage(),
-                  '/games': (_) => const WordlePage(),
-                  '/calendar': (_) => TasksPage(selectedDay: DateTime.now()),
+              return BlocBuilder<AppSettingsCubit, AppSettingsState>(
+                builder: (context, settings) {
+                  return MaterialApp(
+                    title: 'Writdle App',
+                    debugShowCheckedModeBanner: false,
+                    scaffoldMessengerKey: _scaffoldMessengerKey,
+                    theme: AppTheme.light(),
+                    darkTheme: AppTheme.dark(),
+                    themeMode: themeMode,
+                    builder: (context, child) {
+                      final mediaQuery = MediaQuery.of(context);
+                      return MediaQuery(
+                        data: mediaQuery.copyWith(
+                          textScaler: TextScaler.linear(settings.textScale),
+                        ),
+                        child: child ?? const SizedBox.shrink(),
+                      );
+                    },
+                    initialRoute: '/splash',
+                    routes: {
+                      '/splash': (_) => const SplashScreen(),
+                      '/home': (_) => const HomePage(),
+                      '/login': (_) => const LoginPage(),
+                      '/register': (_) => const RegisterPage(),
+                      '/activity': (_) => const ActivityPage(),
+                      '/notes': (_) => const NotesPage(),
+                      '/games': (_) => const WordlePage(),
+                      '/calendar': (_) => TasksPage(selectedDay: DateTime.now()),
+                      '/settings': (_) => const SettingsPage(),
+                    },
+                  );
                 },
               );
             },

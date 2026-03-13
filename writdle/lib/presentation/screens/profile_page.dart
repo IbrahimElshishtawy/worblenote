@@ -28,6 +28,10 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text('My Profile'),
         actions: [
           IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            icon: const Icon(Icons.tune_rounded),
+          ),
+          IconButton(
             onPressed: () async {
               await context.read<ProfileCubit>().logout();
               if (!mounted) {

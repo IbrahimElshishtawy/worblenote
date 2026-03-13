@@ -4,16 +4,16 @@ class WordGenerator {
   static const int cycleDays = 100;
   static const int wordLength = 5;
   static const int wordCount = 100;
-  static final Random _random = Random();
 
   static List<String> generateWordsForCycle(int cycleSeed) {
+    final random = Random(cycleSeed);
     const String alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     final Set<String> words = {};
 
     while (words.length < wordCount) {
-      String word = '';
+      var word = '';
       while (word.length < wordLength) {
-        String letter = alphabet[_random.nextInt(alphabet.length)];
+        final letter = alphabet[random.nextInt(alphabet.length)];
         if (!word.contains(letter)) {
           word += letter;
         }
@@ -28,12 +28,8 @@ class WordGenerator {
     final now = DateTime.now();
     final baseDate = DateTime(2025, 1, 1);
     final totalDays = now.difference(baseDate).inDays;
-
     final cycleNumber = totalDays ~/ cycleDays;
-    final cycleSeed = cycleNumber;
-
-    final words = generateWordsForCycle(cycleSeed);
-
+    final words = generateWordsForCycle(cycleNumber);
     final dailyIndex = totalDays % wordCount;
     return words[dailyIndex];
   }
