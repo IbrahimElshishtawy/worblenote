@@ -48,8 +48,12 @@ class WritdleApp extends StatelessWidget {
           BlocProvider(create: (_) => AppNotificationCubit()),
           BlocProvider(create: (_) => AuthCubit(authRepository)),
           BlocProvider(create: (_) => NotesCubit(noteRepository)),
-          BlocProvider(create: (_) => TasksCubit(taskRepository, profileRepository)),
-          BlocProvider(create: (_) => ProfileCubit(profileRepository, authRepository)),
+          BlocProvider(
+            create: (_) => TasksCubit(taskRepository, profileRepository),
+          ),
+          BlocProvider(
+            create: (_) => ProfileCubit(profileRepository, authRepository),
+          ),
         ],
         child: AppNotificationListener(
           scaffoldMessengerKey: scaffoldMessengerKey,
@@ -64,6 +68,10 @@ class WritdleApp extends StatelessWidget {
                     theme: AppTheme.light(),
                     darkTheme: AppTheme.dark(),
                     themeMode: themeMode,
+                    themeAnimationCurve: Curves.easeInOutCubic,
+                    themeAnimationDuration: settings.reduceMotion
+                        ? Duration.zero
+                        : const Duration(milliseconds: 550),
                     builder: (context, child) {
                       final mediaQuery = MediaQuery.of(context);
                       return MediaQuery(
