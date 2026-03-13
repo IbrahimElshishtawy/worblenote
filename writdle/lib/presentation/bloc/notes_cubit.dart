@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/domain/entities/note_load_result.dart';
 import 'package:writdle/domain/entities/note_model.dart';
 import 'package:writdle/domain/repositories/note_repository.dart';
 
@@ -8,18 +9,21 @@ class NotesState {
     this.isLoading = false,
     this.errorMessage,
     this.selectedDate,
+    this.isOfflineData = false,
   });
 
   final List<NoteModel> notes;
   final bool isLoading;
   final String? errorMessage;
   final String? selectedDate;
+  final bool isOfflineData;
 
   NotesState copyWith({
     List<NoteModel>? notes,
     bool? isLoading,
     String? errorMessage,
     String? selectedDate,
+    bool? isOfflineData,
     bool clearError = false,
   }) {
     return NotesState(
@@ -27,6 +31,7 @@ class NotesState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       selectedDate: selectedDate ?? this.selectedDate,
+      isOfflineData: isOfflineData ?? this.isOfflineData,
     );
   }
 }
@@ -39,20 +44,22 @@ class NotesCubit extends Cubit<NotesState> {
   Future<void> fetchNotes(String date) async {
     emit(state.copyWith(isLoading: true, selectedDate: date, clearError: true));
     try {
-      final notes = await _repository.getNotes(date);
+      final NoteLoadResult result = await _repository.getNotes(date);
       emit(
         state.copyWith(
-          notes: notes,
+          notes: result.notes,
           isLoading: false,
           selectedDate: date,
+          isOfflineData: result.isFromCache,
         ),
       );
-    } catch (error) {
+    } catch (_) {
       emit(
         state.copyWith(
           isLoading: false,
           errorMessage: 'Failed to load notes',
           selectedDate: date,
+          isOfflineData: false,
         ),
       );
     }
