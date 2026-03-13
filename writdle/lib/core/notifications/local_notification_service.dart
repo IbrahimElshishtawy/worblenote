@@ -76,8 +76,6 @@ class LocalNotificationService {
       tz.TZDateTime.from(scheduledAt, tz.local),
       _details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       payload: 'task_reminder',
     );
   }

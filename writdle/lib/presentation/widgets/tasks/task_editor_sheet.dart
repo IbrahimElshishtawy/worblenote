@@ -85,7 +85,7 @@ class TaskEditorSheet extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             DropdownButtonFormField<String>(
-              value: selectedCategory,
+              initialValue: selectedCategory,
               decoration: const InputDecoration(
                 labelText: 'Category',
                 prefixIcon: Icon(Icons.category_outlined),
@@ -101,7 +101,7 @@ class TaskEditorSheet extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             DropdownButtonFormField<TaskPriority>(
-              value: selectedPriority,
+              initialValue: selectedPriority,
               decoration: const InputDecoration(
                 labelText: 'Priority',
                 prefixIcon: Icon(Icons.flag_outlined),
