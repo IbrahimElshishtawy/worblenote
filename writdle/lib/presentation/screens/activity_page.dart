@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:provider/provider.dart';
-import 'package:writdle/presentation/providers/tasks_provider.dart';
-import 'package:writdle/presentation/providers/user_stats_provider.dart';
-import 'task_page.dart';
+import 'package:writdle/core/utils/date_formatter.dart';
+import 'package:writdle/presentation/bloc/profile_cubit.dart';
+import 'package:writdle/presentation/bloc/tasks_cubit.dart';
+import 'package:writdle/presentation/screens/task_page.dart';
 
 class ActivityPage extends StatefulWidget {
   const ActivityPage({super.key});
@@ -14,36 +15,34 @@ class ActivityPage extends StatefulWidget {
 
 class _ActivityPageState extends State<ActivityPage> {
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  DateTime _selectedDay = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TasksProvider>().fetchTasks(_formatDate(_selectedDay!));
+      context.read<TasksCubit>().fetchTasks(DateFormatter.toDayKey(_selectedDay));
     });
   }
-
-  String _formatDate(DateTime date) =>
-      "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Daily Activity'),
-        centerTitle: true,
-      ),
-      body: Consumer<TasksProvider>(
-        builder: (context, tasksProvider, child) {
-          final totalTasks = tasksProvider.tasks.length;
-          final completedTasks = tasksProvider.tasks.where((t) => t.completed).length;
+      appBar: AppBar(title: const Text('Your Daily Activity')),
+      body: BlocBuilder<TasksCubit, TasksState>(
+        builder: (context, state) {
+          final totalTasks = state.tasks.length;
+          final completedTasks = state.completedTasks;
           final progress = totalTasks == 0 ? 0.0 : completedTasks / totalTasks;
-          final uncompletedTasks = tasksProvider.tasks.where((t) => !t.completed).toList();
+          final uncompletedTasks =
+              state.tasks.where((task) => !task.completed).toList();
 
           return RefreshIndicator(
-            onRefresh: () => tasksProvider.fetchTasks(_formatDate(_selectedDay!)),
+            onRefresh: () {
+              return context.read<TasksCubit>().fetchTasks(
+                DateFormatter.toDayKey(_selectedDay),
+              );
+            },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
@@ -60,27 +59,19 @@ class _ActivityPageState extends State<ActivityPage> {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                       });
-                      tasksProvider.fetchTasks(_formatDate(selectedDay));
+                      context.read<TasksCubit>().fetchTasks(
+                        DateFormatter.toDayKey(selectedDay),
+                      );
                     },
                     headerStyle: const HeaderStyle(
                       formatButtonVisible: false,
                       titleCentered: true,
                     ),
-                    calendarStyle: CalendarStyle(
-                      todayDecoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      selectedDecoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 24),
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -89,11 +80,7 @@ class _ActivityPageState extends State<ActivityPage> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 12),
-                          LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 10,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
+                          LinearProgressIndicator(value: progress, minHeight: 10),
                         ],
                       ),
                     ),
@@ -103,59 +90,63 @@ class _ActivityPageState extends State<ActivityPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.add_task),
-                        label: const Text('Manage Tasks'),
                         onPressed: () async {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => TasksPage(selectedDay: _selectedDay!),
+                              builder: (_) => TasksPage(selectedDay: _selectedDay),
                             ),
                           );
-                          if (mounted) {
-                            tasksProvider.fetchTasks(_formatDate(_selectedDay!));
-                            context.read<UserStatsProvider>().loadFromFirestore();
+                          if (!mounted) {
+                            return;
                           }
+                          await context.read<TasksCubit>().fetchTasks(
+                            DateFormatter.toDayKey(_selectedDay),
+                          );
+                          await context.read<ProfileCubit>().loadProfile();
                         },
+                        icon: const Icon(Icons.add_task),
+                        label: const Text('Manage Tasks'),
                       ),
                       Text('Remaining: ${totalTasks - completedTasks}'),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  if (uncompletedTasks.isNotEmpty) ...[
-                    const Text(
-                      '📌 Tasks to complete:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
-                    ...uncompletedTasks.map((task) => Card(
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          child: ListTile(
-                            title: Text(task.title),
-                            subtitle: task.description.isNotEmpty ? Text(task.description) : null,
-                            trailing: IconButton(
-                              icon: const Icon(Icons.check_circle_outline),
-                              onPressed: () async {
-                                await tasksProvider.toggleTaskCompletion(task, _formatDate(_selectedDay!));
-                                if (mounted) {
-                                  context.read<UserStatsProvider>().loadFromFirestore();
-                                }
-                              },
-                            ),
-                          ),
-                        )),
-                  ] else if (totalTasks > 0)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Text('🎉 All caught up for today!', style: TextStyle(fontSize: 16)),
-                      ),
-                    )
+                  if (state.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (uncompletedTasks.isEmpty && totalTasks == 0)
+                    const Center(child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text('No tasks for this day. Add some!'),
+                    ))
+                  else if (uncompletedTasks.isEmpty)
+                    const Center(child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text('All caught up for today!'),
+                    ))
                   else
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Text('No tasks for today. Add some!', style: TextStyle(fontSize: 16)),
+                    ...uncompletedTasks.map(
+                      (task) => Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          title: Text(task.title),
+                          subtitle: task.description.isEmpty
+                              ? null
+                              : Text(task.description),
+                          trailing: IconButton(
+                            onPressed: () async {
+                              await context.read<TasksCubit>().toggleTaskCompletion(
+                                task,
+                                DateFormatter.toDayKey(_selectedDay),
+                              );
+                              if (!mounted) {
+                                return;
+                              }
+                              await context.read<ProfileCubit>().loadProfile();
+                            },
+                            icon: const Icon(Icons.check_circle_outline),
+                          ),
+                        ),
                       ),
                     ),
                 ],

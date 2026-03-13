@@ -14,11 +14,12 @@ class NoteModel {
   });
 
   factory NoteModel.fromMap(Map<String, dynamic> data, String id) {
+    final rawDate = data['createdAt'] ?? data['timestamp'];
     return NoteModel(
       id: id,
       title: data['title'] ?? '',
-      content: data['content'] ?? '',
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      content: data['content'] ?? data['description'] ?? '',
+      createdAt: rawDate is Timestamp ? rawDate.toDate() : DateTime.now(),
     );
   }
 

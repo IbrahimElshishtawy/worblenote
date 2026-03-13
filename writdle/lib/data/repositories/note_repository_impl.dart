@@ -43,6 +43,7 @@ class NoteRepositoryImpl implements INoteRepository {
     await _firestore.collection('notes').doc(note.id).update({
       'title': note.title,
       'description': note.content,
+      'timestamp': FieldValue.serverTimestamp(),
     });
   }
 

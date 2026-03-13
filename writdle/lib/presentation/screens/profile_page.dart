@@ -1,9 +1,7 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:writdle/data/profile_stats_card.dart';
-import 'package:writdle/domain/entities/profile_logic.dart';
-import 'package:writdle/data/user_stats.dart'; // علشان UserStats
+import 'package:writdle/presentation/bloc/profile_cubit.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,146 +11,102 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final logic = ProfileLogic();
-
-  String userName = '';
-  String email = '';
-  String currentDateTime = '';
-  bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _initProfile();
-
-    logic.startClock((time) {
-      if (!mounted) return;
-      setState(() => currentDateTime = time);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileCubit>().loadProfile();
     });
-  }
-
-  Future<void> _initProfile() async {
-    setState(() => isLoading = true);
-
-    print('📦 Loading data from Firestore...');
-    await UserStats.loadFromFirestore();
-
-    print('📦 Loaded from Firestore:');
-    print('UserStats.completedTasks = ${UserStats.completedTasks}');
-    print('UserStats.completedTaskTitles = ${UserStats.completedTaskTitles}');
-
-    logic.fetchUserData((name, mail, _) {
-      if (!mounted) return;
-      setState(() {
-        userName = name;
-        email = mail;
-        isLoading = false;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    logic.disposeTimer();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalWins =
-        UserStats.winsFirstTry +
-        UserStats.winsSecondTry +
-        UserStats.winsThirdTry +
-        UserStats.winsFourthTry;
-
-    final winRate = logic.calculateWinRate(totalWins, UserStats.totalGames);
-    final progress = logic.calculateProgress(
-      UserStats.completedTasks,
-      UserStats.completedTasks,
-    );
-
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text("My Profile"),
-        centerTitle: true,
+        title: const Text('My Profile'),
         actions: [
           IconButton(
+            onPressed: () async {
+              await context.read<ProfileCubit>().logout();
+              if (!mounted) {
+                return;
+              }
+              Navigator.pushReplacementNamed(context, '/login');
+            },
             icon: const Icon(Icons.logout),
-            onPressed: () => logic.signOut(context),
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _initProfile,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      currentDateTime,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.deepPurple, width: 3),
-                      ),
-                      padding: const EdgeInsets.all(3),
-                      child: const CircleAvatar(
-                        radius: 55,
-                        backgroundImage: AssetImage(
-                          "assets/icon/w-logo-image_332120.jpg",
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      userName,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(email, style: const TextStyle(color: Colors.white70)),
+      body: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: (context, state) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                    /// 🧠 الإحصائيات بدون rating و totalGames
-                    ProfileStatsCard(
-                      completedTasks: UserStats.completedTasks,
-                      totalTasks: UserStats.completedTasks,
-                      losses: UserStats.losses,
-                      progress: progress,
-                      winRate: winRate,
+          final profile = state.profile;
+          final stats = state.stats;
+          final progress = stats.completedTasks == 0 ? 0.0 : 1.0;
+
+          return RefreshIndicator(
+            onRefresh: () => context.read<ProfileCubit>().loadProfile(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    state.currentDateTime,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.deepPurple, width: 3),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    /// ✅ المهام المكتملة
-                    if (UserStats.completedTaskTitles.isNotEmpty)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "✅ Completed Tasks Today",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ...UserStats.completedTaskTitles.map(
+                    padding: const EdgeInsets.all(3),
+                    child: const CircleAvatar(
+                      radius: 55,
+                      backgroundImage: AssetImage(
+                        'assets/icon/w-logo-image_332120.jpg',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    profile?.name ?? 'Guest',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    profile?.email ?? '',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  ProfileStatsCard(
+                    completedTasks: stats.completedTasks,
+                    totalTasks: stats.completedTasks,
+                    losses: stats.losses,
+                    progress: progress,
+                    winRate: stats.winRate,
+                  ),
+                  const SizedBox(height: 24),
+                  if (stats.completedTaskTitles.isEmpty)
+                    const Text(
+                      'No completed tasks yet today.',
+                      style: TextStyle(color: Colors.white60),
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: stats.completedTaskTitles
+                          .map(
                             (title) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Row(
@@ -166,26 +120,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                   Expanded(
                                     child: Text(
                                       title,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
+                                      style: const TextStyle(color: Colors.white),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        ],
-                      )
-                    else
-                      const Text(
-                        "No completed tasks yet today.",
-                        style: TextStyle(color: Colors.white60),
-                      ),
-                  ],
-                ),
+                          )
+                          .toList(),
+                    ),
+                ],
               ),
             ),
+          );
+        },
+      ),
     );
   }
 }

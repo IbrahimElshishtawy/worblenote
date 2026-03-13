@@ -16,6 +16,7 @@ class TaskRepositoryImpl implements ITaskRepository {
         .collection('tasks')
         .where('userId', isEqualTo: userId)
         .where('date', isEqualTo: date)
+        .orderBy('createdAt', descending: false)
         .get();
 
     return snapshot.docs
@@ -41,7 +42,11 @@ class TaskRepositoryImpl implements ITaskRepository {
   @override
   Future<void> updateTask(TaskModel task) async {
     await _firestore.collection('tasks').doc(task.id).update({
+      'title': task.title,
+      'description': task.description,
       'completed': task.completed,
+      'date': task.date,
+      'createdAt': Timestamp.fromDate(task.createdAt),
     });
   }
 

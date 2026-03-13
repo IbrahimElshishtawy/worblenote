@@ -21,7 +21,7 @@ class _StatsPageState extends State<StatsPage> {
       prefs.getInt('win2') ?? 0,
       prefs.getInt('win3') ?? 0,
       prefs.getInt('win4') ?? 0,
-      prefs.getInt('fail') ?? 0,
+      prefs.getInt('total_losses') ?? 0,
     ];
   }
 
@@ -31,7 +31,7 @@ class _StatsPageState extends State<StatsPage> {
     await prefs.remove('win2');
     await prefs.remove('win3');
     await prefs.remove('win4');
-    await prefs.remove('fail');
+    await prefs.remove('total_losses');
 
     setState(() {}); // إعادة تحميل البيانات بعد الحذف
   }

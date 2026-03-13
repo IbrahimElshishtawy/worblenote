@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:writdle/presentation/providers/user_stats_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/presentation/bloc/profile_cubit.dart';
+import 'package:writdle/presentation/screens/activity_page.dart';
+import 'package:writdle/presentation/screens/games_page.dart';
+import 'package:writdle/presentation/screens/note_page.dart';
 import 'package:writdle/presentation/screens/profile_page.dart';
-import 'activity_page.dart';
-import 'note_page.dart';
-import 'games_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,47 +25,27 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget currentPage;
-
-    switch (_currentIndex) {
-      case 0:
-        currentPage = WordlePage(
-          onGameFinished: () {
-            context.read<UserStatsProvider>().loadFromFirestore();
-          },
-        );
-        break;
-      case 1:
-        currentPage = const NotesPage();
-        break;
-      case 2:
-        currentPage = const ActivityPage();
-        break;
-      case 3:
-        currentPage = ProfilePage();
-        break;
-      default:
-        currentPage = const NotesPage();
-    }
+    final pages = [
+      WordlePage(
+        onGameFinished: () {
+          context.read<ProfileCubit>().loadProfile();
+        },
+      ),
+      const NotesPage(),
+      const ActivityPage(),
+      const ProfilePage(),
+    ];
 
     return Scaffold(
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: currentPage,
+        child: pages[_currentIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (newIndex) {
-          setState(() {
-            _currentIndex = newIndex;
-          });
-        },
+        onTap: (index) => setState(() => _currentIndex = index),
         items: _tabs,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }

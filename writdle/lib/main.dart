@@ -1,110 +1,111 @@
-// ignore_for_file: depend_on_referenced_packages, avoid_print
-
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:provider/provider.dart';
-import 'firebase_options.dart';
-import 'package:writdle/domain/repositories/auth_repository.dart';
-import 'package:writdle/domain/repositories/note_repository.dart';
-import 'package:writdle/domain/repositories/task_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/notifications/app_notification_cubit.dart';
+import 'package:writdle/core/notifications/local_notification_service.dart';
 import 'package:writdle/data/repositories/auth_repository_impl.dart';
 import 'package:writdle/data/repositories/note_repository_impl.dart';
+import 'package:writdle/data/repositories/profile_repository_impl.dart';
 import 'package:writdle/data/repositories/task_repository_impl.dart';
-import 'package:writdle/presentation/providers/auth_provider.dart';
-import 'package:writdle/presentation/providers/user_stats_provider.dart';
-import 'package:writdle/presentation/providers/notes_provider.dart';
-import 'package:writdle/presentation/providers/tasks_provider.dart';
+import 'package:writdle/domain/repositories/auth_repository.dart';
+import 'package:writdle/domain/repositories/note_repository.dart';
+import 'package:writdle/domain/repositories/profile_repository.dart';
+import 'package:writdle/domain/repositories/task_repository.dart';
+import 'package:writdle/firebase_options.dart';
+import 'package:writdle/presentation/bloc/auth_cubit.dart';
+import 'package:writdle/presentation/bloc/notes_cubit.dart';
+import 'package:writdle/presentation/bloc/profile_cubit.dart';
+import 'package:writdle/presentation/bloc/tasks_cubit.dart';
 import 'package:writdle/presentation/screens/Splash_Screen_page.dart';
+import 'package:writdle/presentation/screens/activity_page.dart';
+import 'package:writdle/presentation/screens/games_page.dart';
 import 'package:writdle/presentation/screens/home_page.dart';
 import 'package:writdle/presentation/screens/login_page.dart';
-import 'package:writdle/presentation/screens/register_page.dart';
-import 'package:writdle/presentation/screens/activity_page.dart';
 import 'package:writdle/presentation/screens/note_page.dart';
-import 'package:writdle/presentation/screens/games_page.dart';
+import 'package:writdle/presentation/screens/register_page.dart';
 import 'package:writdle/presentation/screens/task_page.dart';
+import 'package:writdle/presentation/widgets/app_notification_listener.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await LocalNotificationService.instance.initialize();
 
-  // Repositories
   final authRepository = AuthRepositoryImpl();
   final noteRepository = NoteRepositoryImpl();
   final taskRepository = TaskRepositoryImpl();
+  final profileRepository = ProfileRepositoryImpl();
 
   runApp(
-    MultiProvider(
-      providers: [
-        Provider<IAuthRepository>.value(value: authRepository),
-        Provider<INoteRepository>.value(value: noteRepository),
-        Provider<ITaskRepository>.value(value: taskRepository),
-        ChangeNotifierProvider(create: (_) => AuthProvider(authRepository)),
-        ChangeNotifierProvider(create: (_) => UserStatsProvider()),
-        ChangeNotifierProvider(create: (_) => NotesProvider(noteRepository)),
-        ChangeNotifierProvider(create: (_) => TasksProvider(taskRepository)),
-      ],
-      child: const Writdle(),
+    Writdle(
+      authRepository: authRepository,
+      noteRepository: noteRepository,
+      taskRepository: taskRepository,
+      profileRepository: profileRepository,
     ),
   );
 }
 
 class Writdle extends StatelessWidget {
-  const Writdle({super.key});
+  const Writdle({
+    super.key,
+    required this.authRepository,
+    required this.noteRepository,
+    required this.taskRepository,
+    required this.profileRepository,
+  });
+
+  final IAuthRepository authRepository;
+  final INoteRepository noteRepository;
+  final ITaskRepository taskRepository;
+  final IProfileRepository profileRepository;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Writdle App',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-          brightness: Brightness.dark,
-          surface: const Color(0xFF121212),
-          surfaceContainer: const Color(0xFF1E1E1E),
-        ),
-        textTheme: const TextTheme(
-          displaySmall: TextStyle(fontWeight: FontWeight.bold),
-          headlineMedium: TextStyle(fontWeight: FontWeight.w600),
-          titleLarge: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-        cardTheme: CardTheme(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<IAuthRepository>.value(value: authRepository),
+        RepositoryProvider<INoteRepository>.value(value: noteRepository),
+        RepositoryProvider<ITaskRepository>.value(value: taskRepository),
+        RepositoryProvider<IProfileRepository>.value(value: profileRepository),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => AppNotificationCubit()),
+          BlocProvider(create: (_) => AuthCubit(authRepository)),
+          BlocProvider(create: (_) => NotesCubit(noteRepository)),
+          BlocProvider(create: (_) => TasksCubit(taskRepository, profileRepository)),
+          BlocProvider(
+            create: (_) => ProfileCubit(profileRepository, authRepository),
           ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+        ],
+        child: AppNotificationListener(
+          child: MaterialApp(
+            title: 'Writdle App',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              useMaterial3: true,
+              brightness: Brightness.dark,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.indigo,
+                brightness: Brightness.dark,
+              ),
+              appBarTheme: const AppBarTheme(centerTitle: true),
+            ),
+            initialRoute: '/splash',
+            routes: {
+              '/splash': (_) => const SplashScreen(),
+              '/home': (_) => const HomePage(),
+              '/login': (_) => const LoginPage(),
+              '/register': (_) => const RegisterPage(),
+              '/activity': (_) => const ActivityPage(),
+              '/notes': (_) => const NotesPage(),
+              '/games': (_) => const WordlePage(),
+              '/calendar': (_) => TasksPage(selectedDay: DateTime.now()),
+            },
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
-      initialRoute: '/splash',
-      routes: {
-        '/splash': (context) => const SplashScreen(),
-        '/home': (context) => const HomePage(),
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-        '/activity': (context) => const ActivityPage(),
-        '/notes': (context) => const NotesPage(),
-        '/games': (context) => const WordlePage(),
-        '/calendar': (context) => TasksPage(selectedDay: DateTime.now()),
-      },
     );
   }
 }

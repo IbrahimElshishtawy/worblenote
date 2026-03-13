@@ -1,17 +1,18 @@
-// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
-
 import 'package:flutter/material.dart';
-import 'package:writdle/domain/entities/wordle_game_logic.dart';
-import 'package:writdle/presentation/screens/Stats_games_Page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/notifications/app_notification.dart';
+import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/data/datasources/game_stats_service.dart';
+import 'package:writdle/domain/entities/wordle_game_logic.dart';
+import 'package:writdle/domain/repositories/profile_repository.dart';
+import 'package:writdle/presentation/screens/Stats_games_Page.dart';
 import 'package:writdle/presentation/widgets/keyboard_widget.dart';
 import 'package:writdle/presentation/widgets/wordle_grid.dart';
-import 'package:writdle/data/user_stats.dart'; // لإرسال البيانات للبروفايل
 
 class WordlePage extends StatefulWidget {
-  final VoidCallback? onGameFinished;
-
   const WordlePage({super.key, this.onGameFinished});
+
+  final VoidCallback? onGameFinished;
 
   @override
   State<WordlePage> createState() => _WordlePageState();
@@ -19,15 +20,13 @@ class WordlePage extends StatefulWidget {
 
 class _WordlePageState extends State<WordlePage> {
   final WordleGameLogic game = WordleGameLogic();
-  final GameStatsService statsService = GameStatsService(); // ✅ جديد
+  final GameStatsService statsService = GameStatsService();
 
   @override
   void initState() {
     super.initState();
     game.initGame().then((_) {
-      print('🕹️ Game initialized');
       if (game.gameEnded) {
-        print('⛔ Game already ended. Starting cooldown timer...');
         game.updateCooldownTimer(() => setState(() {}));
       }
       setState(() {});
@@ -37,63 +36,71 @@ class _WordlePageState extends State<WordlePage> {
   @override
   void dispose() {
     game.dispose();
-    print('🧹 Game disposed');
     super.dispose();
   }
 
-  void _onKeyTap(String key) async {
+  Future<void> _onKeyTap(String key) async {
     if (!game.canPlay()) {
-      print('⛔ Game is not playable now');
       return;
     }
 
-    print('⌨️ Key tapped: $key');
     setState(() {
       game.tapKey(key);
     });
 
-    if (key == 'ENTER') {
-      String guess = game.guesses[game.currentRow];
-      print('📤 Submitting guess: $guess');
+    if (key != 'ENTER') {
+      return;
+    }
 
-      if (guess.length == 5) {
-        final message = await game.submitGuess(guess);
+    final guess = game.guesses[game.currentRow];
+    if (guess.length != 5) {
+      return;
+    }
 
-        if (message != null) {
-          print('📢 Result message: $message');
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(message)));
-        }
+    final message = await game.submitGuess(guess);
+    if (message != null && mounted) {
+      context.read<AppNotificationCubit>().show(
+        message,
+        type: AppNotificationType.info,
+      );
+    }
 
-        if (game.gameEnded) {
-          print('✅ Game ended! Updating stats...');
-
-          UserStats.updateStats(
-            total: UserStats.totalGames + 1,
-            first: UserStats.winsFirstTry,
-            second: UserStats.winsSecondTry,
-            third: UserStats.winsThirdTry,
-            fourth: UserStats.winsFourthTry,
-            loss: UserStats.losses,
-            completed: 0,
-            titles: [],
-          );
-
-          if (game.didWin) {
-            await statsService.incrementGame(
-              isWin: true,
-              tryNumber: game.resultAttempt,
+    if (game.gameEnded) {
+      final repository = context.read<IProfileRepository>();
+      final currentStats = await repository.getStats();
+      final updatedStats = game.didWin
+          ? currentStats.copyWith(
+              totalGames: currentStats.totalGames + 1,
+              winsFirstTry:
+                  currentStats.winsFirstTry + (game.resultAttempt == 1 ? 1 : 0),
+              winsSecondTry:
+                  currentStats.winsSecondTry + (game.resultAttempt == 2 ? 1 : 0),
+              winsThirdTry:
+                  currentStats.winsThirdTry + (game.resultAttempt == 3 ? 1 : 0),
+              winsFourthTry:
+                  currentStats.winsFourthTry + (game.resultAttempt == 4 ? 1 : 0),
+            )
+          : currentStats.copyWith(
+              totalGames: currentStats.totalGames + 1,
+              losses: currentStats.losses + 1,
             );
-          } else {
-            await statsService.incrementGame(isWin: false);
-          }
 
-          widget.onGameFinished?.call();
-        }
+      await repository.saveStats(updatedStats);
 
-        setState(() {});
+      if (game.didWin) {
+        await statsService.incrementGame(
+          isWin: true,
+          tryNumber: game.resultAttempt,
+        );
+      } else {
+        await statsService.incrementGame(isWin: false);
       }
+
+      widget.onGameFinished?.call();
+    }
+
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -103,20 +110,18 @@ class _WordlePageState extends State<WordlePage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        elevation: 0,
         title: const Text('Wordle Game'),
-        centerTitle: true,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               const SizedBox(height: 30),
               Expanded(
                 flex: 2,
                 child: WordleGrid(
-                  guesses: game.guesses.map((g) => g.split('')).toList(),
+                  guesses: game.guesses.map((guess) => guess.split('')).toList(),
                   results: game.results,
                 ),
               ),
@@ -125,7 +130,7 @@ class _WordlePageState extends State<WordlePage> {
                 flex: 3,
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 70.0),
+                    padding: const EdgeInsets.only(top: 70),
                     child: Column(
                       children: [
                         KeyboardWidget(
@@ -135,19 +140,8 @@ class _WordlePageState extends State<WordlePage> {
                         if (game.gameEnded) ...[
                           const SizedBox(height: 20),
                           ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
                             onPressed: () {
-                              print('📊 Opening stats modal');
-                              showModalBottomSheet(
+                              showModalBottomSheet<void>(
                                 context: context,
                                 isScrollControlled: true,
                                 backgroundColor: Colors.black,
@@ -165,22 +159,13 @@ class _WordlePageState extends State<WordlePage> {
                                 ),
                               );
                             },
-                            icon: const Icon(
-                              Icons.bar_chart,
-                              color: Colors.white,
-                            ),
-                            label: const Text(
-                              'View Stats',
-                              style: TextStyle(fontSize: 16),
-                            ),
+                            icon: const Icon(Icons.bar_chart),
+                            label: const Text('View Stats'),
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            '⏳ Come back in: ${game.formatDuration(game.cooldownLeft)}',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
+                            'Come back in: ${game.formatDuration(game.cooldownLeft)}',
+                            style: const TextStyle(color: Colors.white70),
                           ),
                         ],
                       ],

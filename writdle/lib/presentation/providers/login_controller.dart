@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:writdle/domain/repositories/auth_repository.dart';
-import 'package:writdle/presentation/providers/auth_provider.dart';
 
 class LoginController with ChangeNotifier {
   final IAuthRepository _repository;
