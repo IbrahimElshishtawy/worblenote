@@ -18,6 +18,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  static const _developerEmail = 'shishtawy@gmail.com';
+  static const _developerPassword = 'hima123';
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -86,6 +89,11 @@ class _LoginPageState extends State<LoginPage> {
                       final form = _LoginForm(
                         emailController: _emailController,
                         passwordController: _passwordController,
+                        onUseDeveloperAccount: () {
+                          _emailController.text = _developerEmail;
+                          _passwordController.text = _developerPassword;
+                          setState(() {});
+                        },
                         onSubmit: () => _submit(context),
                       );
 
@@ -132,11 +140,13 @@ class _LoginForm extends StatelessWidget {
   const _LoginForm({
     required this.emailController,
     required this.passwordController,
+    required this.onUseDeveloperAccount,
     required this.onSubmit,
   });
 
   final TextEditingController emailController;
   final TextEditingController passwordController;
+  final VoidCallback onUseDeveloperAccount;
   final VoidCallback onSubmit;
 
   @override
@@ -201,6 +211,12 @@ class _LoginForm extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Text('Login'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: state.isLoading ? null : onUseDeveloperAccount,
+                icon: const Icon(Icons.admin_panel_settings_outlined),
+                label: const Text('Use Developer Account'),
               ),
               const SizedBox(height: 18),
               TextButton(

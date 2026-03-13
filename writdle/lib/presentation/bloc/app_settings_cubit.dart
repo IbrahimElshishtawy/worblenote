@@ -8,6 +8,9 @@ class AppSettingsState {
     this.reduceMotion = false,
     this.requireManualGameRestart = true,
     this.showGameHints = true,
+    this.competitiveGameUi = true,
+    this.showAttemptBadge = true,
+    this.showCountdownBadge = true,
   });
 
   final double textScale;
@@ -15,6 +18,9 @@ class AppSettingsState {
   final bool reduceMotion;
   final bool requireManualGameRestart;
   final bool showGameHints;
+  final bool competitiveGameUi;
+  final bool showAttemptBadge;
+  final bool showCountdownBadge;
 
   AppSettingsState copyWith({
     double? textScale,
@@ -22,6 +28,9 @@ class AppSettingsState {
     bool? reduceMotion,
     bool? requireManualGameRestart,
     bool? showGameHints,
+    bool? competitiveGameUi,
+    bool? showAttemptBadge,
+    bool? showCountdownBadge,
   }) {
     return AppSettingsState(
       textScale: textScale ?? this.textScale,
@@ -30,6 +39,9 @@ class AppSettingsState {
       requireManualGameRestart:
           requireManualGameRestart ?? this.requireManualGameRestart,
       showGameHints: showGameHints ?? this.showGameHints,
+      competitiveGameUi: competitiveGameUi ?? this.competitiveGameUi,
+      showAttemptBadge: showAttemptBadge ?? this.showAttemptBadge,
+      showCountdownBadge: showCountdownBadge ?? this.showCountdownBadge,
     );
   }
 }
@@ -44,6 +56,9 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
   static const _reduceMotionKey = 'app_reduce_motion';
   static const _manualRestartKey = 'app_manual_restart';
   static const _showGameHintsKey = 'app_show_game_hints';
+  static const _competitiveGameUiKey = 'app_competitive_game_ui';
+  static const _showAttemptBadgeKey = 'app_show_attempt_badge';
+  static const _showCountdownBadgeKey = 'app_show_countdown_badge';
 
   Future<void> load() async {
     final preferences = await SharedPreferences.getInstance();
@@ -54,6 +69,9 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
         reduceMotion: preferences.getBool(_reduceMotionKey) ?? false,
         requireManualGameRestart: preferences.getBool(_manualRestartKey) ?? true,
         showGameHints: preferences.getBool(_showGameHintsKey) ?? true,
+        competitiveGameUi: preferences.getBool(_competitiveGameUiKey) ?? true,
+        showAttemptBadge: preferences.getBool(_showAttemptBadgeKey) ?? true,
+        showCountdownBadge: preferences.getBool(_showCountdownBadgeKey) ?? true,
       ),
     );
   }
@@ -86,5 +104,23 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
     emit(state.copyWith(showGameHints: value));
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool(_showGameHintsKey, value);
+  }
+
+  Future<void> setCompetitiveGameUi(bool value) async {
+    emit(state.copyWith(competitiveGameUi: value));
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_competitiveGameUiKey, value);
+  }
+
+  Future<void> setShowAttemptBadge(bool value) async {
+    emit(state.copyWith(showAttemptBadge: value));
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_showAttemptBadgeKey, value);
+  }
+
+  Future<void> setShowCountdownBadge(bool value) async {
+    emit(state.copyWith(showCountdownBadge: value));
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_showCountdownBadgeKey, value);
   }
 }

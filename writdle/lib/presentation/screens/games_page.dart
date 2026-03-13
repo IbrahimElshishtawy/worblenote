@@ -7,6 +7,7 @@ import 'package:writdle/domain/entities/wordle_game_logic.dart';
 import 'package:writdle/domain/repositories/profile_repository.dart';
 import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 import 'package:writdle/presentation/screens/Stats_games_Page.dart';
+import 'package:writdle/presentation/widgets/game/game_status_panel.dart';
 import 'package:writdle/presentation/widgets/keyboard_widget.dart';
 import 'package:writdle/presentation/widgets/wordle_grid.dart';
 
@@ -148,9 +149,12 @@ class _WordlePageState extends State<WordlePage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _GameStatusCard(
+                GameStatusPanel(
                   game: game,
                   showHints: settings.showGameHints,
+                  competitiveMode: settings.competitiveGameUi,
+                  showAttemptBadge: settings.showAttemptBadge,
+                  showCountdownBadge: settings.showCountdownBadge,
                   onRestart: game.isReadyForManualRestart ? _restartGame : null,
                   onStats: () {
                     showModalBottomSheet<void>(
@@ -169,10 +173,34 @@ class _WordlePageState extends State<WordlePage> {
                 const SizedBox(height: 24),
                 Expanded(
                   child: Center(
-                    child: WordleGrid(
-                      guesses: game.guesses.map((guess) => guess.split('')).toList(),
-                      results: game.results,
-                      highContrast: settings.highContrastGame,
+                    child: AnimatedContainer(
+                      duration: Duration(
+                        milliseconds: settings.reduceMotion ? 0 : 240,
+                      ),
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: settings.competitiveGameUi
+                            ? scheme.surface.withValues(alpha: 0.98)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(32),
+                        border: settings.competitiveGameUi
+                            ? Border.all(color: scheme.outlineVariant)
+                            : null,
+                        boxShadow: settings.competitiveGameUi
+                            ? [
+                                BoxShadow(
+                                  color: scheme.shadow.withValues(alpha: 0.08),
+                                  blurRadius: 28,
+                                  offset: const Offset(0, 16),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: WordleGrid(
+                        guesses: game.guesses.map((guess) => guess.split('')).toList(),
+                        results: game.results,
+                        highContrast: settings.highContrastGame,
+                      ),
                     ),
                   ),
                 ),
@@ -186,139 +214,6 @@ class _WordlePageState extends State<WordlePage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _GameStatusCard extends StatelessWidget {
-  const _GameStatusCard({
-    required this.game,
-    required this.showHints,
-    required this.onStats,
-    this.onRestart,
-  });
-
-  final WordleGameLogic game;
-  final bool showHints;
-  final VoidCallback onStats;
-  final VoidCallback? onRestart;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    final title = game.gameEnded
-        ? (game.didWin ? 'You solved it' : 'Round completed')
-        : 'Current Round';
-
-    final subtitle = game.latestResultMessage ??
-        (showHints
-            ? 'Guess the 5-letter word. Correct letters stay green, present letters move to amber.'
-            : 'Play your current saved session.');
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              if (game.gameEnded && game.cooldownLeft > Duration.zero)
-                _InfoChip(
-                  icon: Icons.timer_outlined,
-                  label: game.formatDuration(game.cooldownLeft),
-                  color: const Color(0xFF7C3AED),
-                ),
-              _InfoChip(
-                icon: Icons.grid_view_rounded,
-                label: 'Attempt ${game.currentRow + 1}/4',
-                color: const Color(0xFF2563EB),
-              ),
-              if (game.resultAttempt > 0)
-                _InfoChip(
-                  icon: Icons.emoji_events_outlined,
-                  label: 'Solved in ${game.resultAttempt}',
-                  color: const Color(0xFF16A34A),
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              OutlinedButton.icon(
-                onPressed: onStats,
-                icon: const Icon(Icons.bar_chart_rounded),
-                label: const Text('Stats'),
-              ),
-              const SizedBox(width: 10),
-              if (onRestart != null)
-                ElevatedButton.icon(
-                  onPressed: onRestart,
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Restart'),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(color: color, fontWeight: FontWeight.w700),
-          ),
-        ],
       ),
     );
   }
