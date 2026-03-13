@@ -14,6 +14,7 @@ class AuthCenterLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    const softRedShadow = Color(0x33C84B5A);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -33,11 +34,11 @@ class AuthCenterLogo extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
-                color: scheme.primary.withValues(alpha: 0.20),
+                color: softRedShadow,
                 blurRadius: 28,
-                offset: const Offset(0, 16),
+                offset: Offset(0, 16),
               ),
             ],
           ),

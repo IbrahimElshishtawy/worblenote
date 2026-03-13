@@ -15,17 +15,19 @@ class LoginFormCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    const softRedShadow = Color(0x1FC84B5A);
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: theme.colorScheme.outlineVariant),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.08),
+            color: softRedShadow,
             blurRadius: 30,
-            offset: const Offset(0, 18),
+            offset: Offset(0, 18),
           ),
         ],
       ),

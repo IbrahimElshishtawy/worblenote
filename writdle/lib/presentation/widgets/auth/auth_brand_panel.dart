@@ -60,6 +60,8 @@ class _BrandBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const softRedShadow = Color(0x33C84B5A);
+
     return Container(
       width: size,
       height: size,
@@ -73,11 +75,11 @@ class _BrandBadge extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.22),
+            color: softRedShadow,
             blurRadius: 24,
-            offset: const Offset(0, 16),
+            offset: Offset(0, 16),
           ),
         ],
       ),
