@@ -4,6 +4,11 @@ import 'package:writdle/core/notifications/app_notification.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/domain/repositories/auth_repository.dart';
 import 'package:writdle/presentation/bloc/register_cubit.dart';
+import 'package:writdle/presentation/bloc/theme_cubit.dart';
+import 'package:writdle/presentation/widgets/auth/auth_brand_panel.dart';
+import 'package:writdle/presentation/widgets/auth/auth_input_field.dart';
+import 'package:writdle/presentation/widgets/auth/register_form_card.dart';
+import 'package:writdle/presentation/widgets/auth/register_highlights.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -49,107 +54,160 @@ class _RegisterPageState extends State<RegisterPage> {
           }
         },
         child: Scaffold(
-          appBar: AppBar(),
-          body: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: BlocBuilder<RegisterCubit, RegisterState>(
-                builder: (context, state) {
-                  return Column(
-                    children: [
-                      Text(
-                        'Create Account',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      const SizedBox(height: 32),
-                      TextField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Full Name',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: !state.showPassword,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              context.read<RegisterCubit>().togglePasswordVisibility();
-                            },
-                            icon: Icon(
-                              state.showPassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _confirmPasswordController,
-                        obscureText: !state.showConfirmPassword,
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          prefixIcon: const Icon(Icons.lock_reset),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              context
-                                  .read<RegisterCubit>()
-                                  .toggleConfirmPasswordVisibility();
-                            },
-                            icon: Icon(
-                              state.showConfirmPassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      ElevatedButton(
-                        onPressed: state.isLoading
-                            ? null
-                            : () {
-                                context.read<RegisterCubit>().register(
-                                  name: _nameController.text,
-                                  email: _emailController.text,
-                                  password: _passwordController.text,
-                                  confirmPassword: _confirmPasswordController.text,
-                                );
-                              },
-                        child: state.isLoading
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('Register'),
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Already have an account? Login'),
-                      ),
-                    ],
-                  );
-                },
+          appBar: AppBar(
+            actions: [
+              IconButton(
+                tooltip: 'Toggle theme',
+                onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+                icon: const Icon(Icons.brightness_6_outlined),
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1120),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 920;
+                      final registerForm = _RegisterForm(
+                        nameController: _nameController,
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        confirmPasswordController: _confirmPasswordController,
+                        onSubmit: () => _submit(context),
+                      );
+
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Expanded(child: AuthBrandPanel()),
+                            const SizedBox(width: 24),
+                            const Expanded(child: RegisterHighlights()),
+                            const SizedBox(width: 24),
+                            Expanded(child: registerForm),
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const AuthBrandPanel(),
+                          const SizedBox(height: 24),
+                          const RegisterHighlights(),
+                          const SizedBox(height: 24),
+                          registerForm,
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _submit(BuildContext context) {
+    FocusScope.of(context).unfocus();
+    context.read<RegisterCubit>().register(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+          confirmPassword: _confirmPasswordController.text,
+        );
+  }
+}
+
+class _RegisterForm extends StatelessWidget {
+  const _RegisterForm({
+    required this.nameController,
+    required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.onSubmit,
+  });
+
+  final TextEditingController nameController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<RegisterCubit, RegisterState>(
+      builder: (context, state) {
+        return RegisterFormCard(
+          title: 'Create your account',
+          subtitle: 'Join your writing, planning, and daily challenge flow in one smart space.',
+          child: Column(
+            children: [
+              AuthInputField(
+                controller: nameController,
+                label: 'Full Name',
+                icon: Icons.person_outline,
+              ),
+              const SizedBox(height: 16),
+              AuthInputField(
+                controller: emailController,
+                label: 'Email',
+                icon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              AuthInputField(
+                controller: passwordController,
+                label: 'Password',
+                icon: Icons.lock_outline,
+                obscureText: !state.showPassword,
+                suffix: IconButton(
+                  onPressed: () => context.read<RegisterCubit>().togglePasswordVisibility(),
+                  icon: Icon(
+                    state.showPassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              AuthInputField(
+                controller: confirmPasswordController,
+                label: 'Confirm Password',
+                icon: Icons.lock_reset,
+                obscureText: !state.showConfirmPassword,
+                onSubmitted: (_) => onSubmit(),
+                suffix: IconButton(
+                  onPressed: () => context.read<RegisterCubit>().toggleConfirmPasswordVisibility(),
+                  icon: Icon(
+                    state.showConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              ElevatedButton(
+                onPressed: state.isLoading ? null : onSubmit,
+                child: state.isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Create Account'),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Already have an account? Login'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
