@@ -1,58 +1,57 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:writdle/core/auth/developer_session.dart';
+import 'dart:async';
+
+import 'package:writdle/core/auth/local_auth_store.dart';
 import 'package:writdle/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  AuthRepositoryImpl() {
+    _emitCurrentState();
+  }
+
+  final StreamController<bool> _authController =
+      StreamController<bool>.broadcast();
 
   @override
   Future<String?> login(String email, String password) async {
-    try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      final preferences = await SharedPreferences.getInstance();
-      await preferences.setBool('isLoggedIn', true);
-      await DeveloperSession.disable();
-      return null;
-    } on FirebaseAuthException catch (e) {
-      if (DeveloperSession.matchesCredentials(email, password)) {
-        await DeveloperSession.enable();
-        return null;
-      }
-      return e.message;
+    final account = await LocalAuthStore.findByEmail(email);
+    if (account == null) {
+      return 'No local account found for this email on this device.';
     }
+    if (account.password != password.trim()) {
+      return 'Incorrect password.';
+    }
+
+    await LocalAuthStore.setCurrentAccount(account);
+    _authController.add(true);
+    return null;
   }
 
   @override
   Future<void> logout() async {
-    await _auth.signOut();
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setBool('isLoggedIn', false);
-    await DeveloperSession.disable();
+    await LocalAuthStore.clearCurrentAccount();
+    _authController.add(false);
   }
 
   @override
   Future<void> register(String name, String email, String password) async {
-    UserCredential cred = await _auth.createUserWithEmailAndPassword(
+    await LocalAuthStore.registerAccount(
+      name: name,
       email: email,
       password: password,
     );
-    await _firestore.collection('users').doc(cred.user!.uid).set({
-      'name': name,
-      'email': email,
-      'uid': cred.user!.uid,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setBool('isLoggedIn', true);
-    await DeveloperSession.disable();
+    _authController.add(true);
   }
 
   @override
-  User? get currentUser => _auth.currentUser;
+  Future<String?> currentUserId() => LocalAuthStore.getCurrentUserId();
 
   @override
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  Future<bool> isAuthenticated() => LocalAuthStore.isAuthenticated();
+
+  @override
+  Stream<bool> get authStateChanges => _authController.stream;
+
+  Future<void> _emitCurrentState() async {
+    _authController.add(await LocalAuthStore.isAuthenticated());
+  }
 }

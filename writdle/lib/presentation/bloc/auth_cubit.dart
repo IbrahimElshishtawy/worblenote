@@ -1,27 +1,23 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:writdle/domain/repositories/auth_repository.dart';
 
 class AuthState {
   const AuthState({
-    this.user,
+    this.isAuthenticated = false,
     this.isInitialized = false,
   });
 
-  final User? user;
+  final bool isAuthenticated;
   final bool isInitialized;
 
-  bool get isAuthenticated => user != null;
-
   AuthState copyWith({
-    User? user,
+    bool? isAuthenticated,
     bool? isInitialized,
-    bool clearUser = false,
   }) {
     return AuthState(
-      user: clearUser ? null : (user ?? this.user),
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isInitialized: isInitialized ?? this.isInitialized,
     );
   }
@@ -29,13 +25,28 @@ class AuthState {
 
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit(this._repository) : super(const AuthState()) {
-    _subscription = _repository.authStateChanges.listen((user) {
-      emit(AuthState(user: user, isInitialized: true));
+    _initialize();
+    _subscription = _repository.authStateChanges.listen((isAuthenticated) {
+      emit(
+        AuthState(
+          isAuthenticated: isAuthenticated,
+          isInitialized: true,
+        ),
+      );
     });
   }
 
   final IAuthRepository _repository;
-  StreamSubscription<User?>? _subscription;
+  StreamSubscription<bool>? _subscription;
+
+  Future<void> _initialize() async {
+    emit(
+      AuthState(
+        isAuthenticated: await _repository.isAuthenticated(),
+        isInitialized: true,
+      ),
+    );
+  }
 
   Future<void> logout() => _repository.logout();
 
