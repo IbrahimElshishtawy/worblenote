@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/auth/developer_session.dart';
 import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 import 'package:writdle/presentation/widgets/splash/splash_background.dart';
 import 'package:writdle/presentation/widgets/splash/splash_hero.dart';
@@ -59,7 +60,8 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) {
       return;
     }
-    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null ||
+        await DeveloperSession.isEnabled();
     Navigator.pushReplacementNamed(context, isLoggedIn ? '/home' : '/login');
   }
 

@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:writdle/core/auth/developer_session.dart';
 import 'package:writdle/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
@@ -13,8 +14,13 @@ class AuthRepositoryImpl implements IAuthRepository {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       final preferences = await SharedPreferences.getInstance();
       await preferences.setBool('isLoggedIn', true);
+      await DeveloperSession.disable();
       return null;
     } on FirebaseAuthException catch (e) {
+      if (DeveloperSession.matchesCredentials(email, password)) {
+        await DeveloperSession.enable();
+        return null;
+      }
       return e.message;
     }
   }
@@ -24,6 +30,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     await _auth.signOut();
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool('isLoggedIn', false);
+    await DeveloperSession.disable();
   }
 
   @override
@@ -40,6 +47,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     });
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool('isLoggedIn', true);
+    await DeveloperSession.disable();
   }
 
   @override
