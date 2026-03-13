@@ -82,7 +82,7 @@ class WritdleApp extends StatelessWidget {
                       );
                     },
                     initialRoute: '/splash',
-                    routes: AppRoutes.routes(),
+                    onGenerateRoute: AppRoutes.onGenerateRoute,
                   );
                 },
               );

@@ -4,7 +4,8 @@ class AuthCenterLogo extends StatelessWidget {
   const AuthCenterLogo({
     super.key,
     this.caption = 'Writdle',
-    this.description = 'One focused space for notes, tasks, and your daily challenge rhythm.',
+    this.description =
+        'One focused space for notes, tasks, and your daily challenge rhythm.',
   });
 
   final String caption;
@@ -14,7 +15,6 @@ class AuthCenterLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    const softRedShadow = Color(0x33C84B5A);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -26,17 +26,13 @@ class AuthCenterLogo extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(36),
             gradient: LinearGradient(
-              colors: [
-                scheme.primary,
-                scheme.secondary,
-                scheme.tertiary,
-              ],
+              colors: [scheme.primary, scheme.secondary, scheme.tertiary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: const [
               BoxShadow(
-                color: softRedShadow,
+                color: Color.fromARGB(51, 57, 123, 60),
                 blurRadius: 28,
                 offset: Offset(0, 16),
               ),
@@ -49,11 +45,14 @@ class AuthCenterLogo extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(28),
-              child: Image.asset('assets/image/WR-Logo-1.jpg', fit: BoxFit.cover),
+              child: Image.asset(
+                'assets/image/WR-Logo-1.jpg',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 8),
         Text(
           caption,
           textAlign: TextAlign.center,
@@ -69,7 +68,7 @@ class AuthCenterLogo extends StatelessWidget {
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,
-              height: 1.5,
+              height: 1,
             ),
           ),
         ),

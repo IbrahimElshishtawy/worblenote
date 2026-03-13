@@ -70,6 +70,8 @@ class _LoginPageState extends State<LoginPage> {
         ],
         child: Scaffold(
           appBar: AppBar(
+            leading: const SizedBox.shrink(),
+            leadingWidth: 0,
             actions: [
               IconButton(
                 tooltip: 'Toggle theme',

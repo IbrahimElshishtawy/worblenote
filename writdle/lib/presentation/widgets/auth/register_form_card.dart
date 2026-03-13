@@ -18,7 +18,7 @@ class RegisterFormCard extends StatelessWidget {
     const softRedShadow = Color(0x1FC84B5A);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(19),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(28),

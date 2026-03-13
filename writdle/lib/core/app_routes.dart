@@ -10,17 +10,83 @@ import 'package:writdle/presentation/screens/settings_page.dart';
 import 'package:writdle/presentation/screens/task_page.dart';
 
 class AppRoutes {
-  static Map<String, WidgetBuilder> routes() {
-    return {
-      '/splash': (_) => const SplashScreen(),
-      '/home': (_) => const HomePage(),
-      '/login': (_) => const LoginPage(),
-      '/register': (_) => const RegisterPage(),
-      '/activity': (_) => const ActivityPage(),
-      '/notes': (_) => const NotesPage(),
-      '/games': (_) => const WordlePage(),
-      '/calendar': (_) => TasksPage(selectedDay: DateTime.now()),
-      '/settings': (_) => const SettingsPage(),
+  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    final page = _pageFor(settings);
+    if (page == null) {
+      return _buildRoute(
+        const Scaffold(
+          body: Center(child: Text('Page not found')),
+        ),
+        settings: settings,
+      );
+    }
+
+    final name = settings.name ?? '';
+    final useScale = name == '/login' || name == '/register' || name == '/splash';
+
+    return _buildRoute(
+      page,
+      settings: settings,
+      useScale: useScale,
+    );
+  }
+
+  static Widget? _pageFor(RouteSettings settings) {
+    return switch (settings.name) {
+      '/splash' => const SplashScreen(),
+      '/home' => const HomePage(),
+      '/login' => const LoginPage(),
+      '/register' => const RegisterPage(),
+      '/activity' => const ActivityPage(),
+      '/notes' => const NotesPage(),
+      '/games' => const WordlePage(),
+      '/calendar' => TasksPage(selectedDay: DateTime.now()),
+      '/settings' => const SettingsPage(),
+      _ => null,
     };
+  }
+
+  static PageRouteBuilder<dynamic> _buildRoute(
+    Widget page, {
+    required RouteSettings settings,
+    bool useScale = false,
+  }) {
+    return PageRouteBuilder<dynamic>(
+      settings: settings,
+      transitionDuration: const Duration(milliseconds: 380),
+      reverseTransitionDuration: const Duration(milliseconds: 280),
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final fade = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+
+        if (useScale) {
+          final scale = Tween<double>(begin: 0.96, end: 1).animate(fade);
+          return FadeTransition(
+            opacity: fade,
+            child: ScaleTransition(
+              scale: scale,
+              child: child,
+            ),
+          );
+        }
+
+        final slide = Tween<Offset>(
+          begin: const Offset(0.06, 0),
+          end: Offset.zero,
+        ).animate(fade);
+
+        return FadeTransition(
+          opacity: fade,
+          child: SlideTransition(
+            position: slide,
+            child: child,
+          ),
+        );
+      },
+    );
   }
 }

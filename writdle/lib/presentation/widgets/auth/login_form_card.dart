@@ -47,7 +47,7 @@ class LoginFormCard extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           child,
         ],
       ),

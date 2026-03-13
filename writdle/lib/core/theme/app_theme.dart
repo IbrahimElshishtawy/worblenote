@@ -41,9 +41,10 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFF07130D),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: true,
         backgroundColor: Colors.transparent,
+        foregroundColor: scheme.onSurface,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

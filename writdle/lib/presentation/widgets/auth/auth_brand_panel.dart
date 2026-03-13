@@ -5,7 +5,8 @@ class AuthBrandPanel extends StatelessWidget {
     super.key,
     this.centered = false,
     this.title = 'Welcome back',
-    this.subtitle = 'Sign in to continue your notes, tasks, games, and progress with a smoother and safer login flow.',
+    this.subtitle =
+        'Sign in to continue your notes, tasks, games, and progress with a smoother and safer login flow.',
   });
 
   final bool centered;
@@ -15,7 +16,9 @@ class AuthBrandPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final alignment = centered ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+    final alignment = centered
+        ? CrossAxisAlignment.center
+        : CrossAxisAlignment.start;
     final textAlign = centered ? TextAlign.center : TextAlign.start;
 
     return Column(
@@ -23,7 +26,7 @@ class AuthBrandPanel extends StatelessWidget {
       children: [
         if (!centered) ...[
           _BrandBadge(theme: theme, size: 82),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
         ],
         Text(
           title,
@@ -40,7 +43,7 @@ class AuthBrandPanel extends StatelessWidget {
             textAlign: textAlign,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              height: 1.5,
+              height: 1,
             ),
           ),
         ),
@@ -50,34 +53,26 @@ class AuthBrandPanel extends StatelessWidget {
 }
 
 class _BrandBadge extends StatelessWidget {
-  const _BrandBadge({
-    required this.theme,
-    required this.size,
-  });
+  const _BrandBadge({required this.theme, required this.size});
 
   final ThemeData theme;
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    const softRedShadow = Color(0x33C84B5A);
-
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.secondary,
-          ],
+          colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: const [
           BoxShadow(
-            color: softRedShadow,
+            color: Color.fromARGB(51, 66, 129, 54),
             blurRadius: 24,
             offset: Offset(0, 16),
           ),
