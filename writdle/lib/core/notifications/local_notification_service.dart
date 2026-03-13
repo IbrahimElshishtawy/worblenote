@@ -1,4 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationService {
   LocalNotificationService._();
@@ -8,6 +10,8 @@ class LocalNotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
+    tz.initializeTimeZones();
+
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
     const settings = InitializationSettings(
@@ -35,23 +39,50 @@ class LocalNotificationService {
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
+  NotificationDetails get _details => const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'writdle_general',
+          'Writdle Notifications',
+          channelDescription: 'General app notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+        macOS: DarwinNotificationDetails(),
+      );
+
   Future<void> show({
     required int id,
     required String title,
     required String body,
   }) async {
-    const details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'writdle_general',
-        'Writdle Notifications',
-        channelDescription: 'General app notifications',
-        importance: Importance.max,
-        priority: Priority.high,
-      ),
-      iOS: DarwinNotificationDetails(),
-      macOS: DarwinNotificationDetails(),
-    );
+    await _plugin.show(id, title, body, _details);
+  }
 
-    await _plugin.show(id, title, body, details);
+  Future<void> schedule({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledAt,
+  }) async {
+    if (scheduledAt.isBefore(DateTime.now())) {
+      return;
+    }
+
+    await _plugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledAt, tz.local),
+      _details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: 'task_reminder',
+    );
+  }
+
+  Future<void> cancel(int id) async {
+    await _plugin.cancel(id);
   }
 }
