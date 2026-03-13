@@ -7,6 +7,7 @@ import 'package:writdle/presentation/bloc/auth_cubit.dart';
 import 'package:writdle/presentation/bloc/login_cubit.dart';
 import 'package:writdle/presentation/bloc/theme_cubit.dart';
 import 'package:writdle/presentation/widgets/auth/auth_brand_panel.dart';
+import 'package:writdle/presentation/widgets/auth/auth_center_logo.dart';
 import 'package:writdle/presentation/widgets/auth/auth_input_field.dart';
 import 'package:writdle/presentation/widgets/auth/login_form_card.dart';
 
@@ -82,10 +83,10 @@ class _LoginPageState extends State<LoginPage> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1040),
+                  constraints: const BoxConstraints(maxWidth: 1180),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final isWide = constraints.maxWidth >= 860;
+                      final isWide = constraints.maxWidth >= 980;
                       final form = _LoginForm(
                         emailController: _emailController,
                         passwordController: _passwordController,
@@ -101,7 +102,21 @@ class _LoginPageState extends State<LoginPage> {
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Expanded(child: AuthBrandPanel()),
+                            const Expanded(
+                              child: AuthBrandPanel(
+                                title: 'Welcome back',
+                                subtitle:
+                                    'Step into your dashboard, track your momentum, and continue where you left off.',
+                              ),
+                            ),
+                            const SizedBox(width: 28),
+                            const Expanded(
+                              child: AuthCenterLogo(
+                                caption: 'Writdle Hub',
+                                description:
+                                    'A centered identity block that keeps the login screen feeling polished and premium.',
+                              ),
+                            ),
                             const SizedBox(width: 28),
                             Expanded(child: form),
                           ],
@@ -109,9 +124,16 @@ class _LoginPageState extends State<LoginPage> {
                       }
 
                       return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const AuthBrandPanel(),
+                          const AuthCenterLogo(),
+                          const SizedBox(height: 24),
+                          const AuthBrandPanel(
+                            centered: true,
+                            title: 'Welcome back',
+                            subtitle:
+                                'Sign in to continue your notes, tasks, games, and progress with a smoother and safer login flow.',
+                          ),
                           const SizedBox(height: 28),
                           form,
                         ],
@@ -173,7 +195,8 @@ class _LoginForm extends StatelessWidget {
                 obscureText: !state.showPassword,
                 onSubmitted: (_) => onSubmit(),
                 suffix: IconButton(
-                  onPressed: () => context.read<LoginCubit>().togglePasswordVisibility(),
+                  onPressed: () =>
+                      context.read<LoginCubit>().togglePasswordVisibility(),
                   icon: Icon(
                     state.showPassword ? Icons.visibility_off : Icons.visibility,
                   ),

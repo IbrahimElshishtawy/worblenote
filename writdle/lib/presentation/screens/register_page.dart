@@ -6,6 +6,7 @@ import 'package:writdle/domain/repositories/auth_repository.dart';
 import 'package:writdle/presentation/bloc/register_cubit.dart';
 import 'package:writdle/presentation/bloc/theme_cubit.dart';
 import 'package:writdle/presentation/widgets/auth/auth_brand_panel.dart';
+import 'package:writdle/presentation/widgets/auth/auth_center_logo.dart';
 import 'package:writdle/presentation/widgets/auth/auth_input_field.dart';
 import 'package:writdle/presentation/widgets/auth/register_form_card.dart';
 import 'package:writdle/presentation/widgets/auth/register_highlights.dart';
@@ -68,10 +69,10 @@ class _RegisterPageState extends State<RegisterPage> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1120),
+                  constraints: const BoxConstraints(maxWidth: 1240),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final isWide = constraints.maxWidth >= 920;
+                      final isWide = constraints.maxWidth >= 1040;
                       final registerForm = _RegisterForm(
                         nameController: _nameController,
                         emailController: _emailController,
@@ -82,11 +83,30 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       if (isWide) {
                         return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Expanded(child: AuthBrandPanel()),
+                            const Expanded(
+                              child: AuthBrandPanel(
+                                title: 'Create a stronger start',
+                                subtitle:
+                                    'Set up your account and bring your planning, writing, and daily play into one polished flow.',
+                              ),
+                            ),
                             const SizedBox(width: 24),
-                            const Expanded(child: RegisterHighlights()),
+                            const Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AuthCenterLogo(
+                                    caption: 'Join Writdle',
+                                    description:
+                                        'The logo now sits at the heart of the screen so the register experience feels more premium and memorable.',
+                                  ),
+                                  SizedBox(height: 28),
+                                  RegisterHighlights(),
+                                ],
+                              ),
+                            ),
                             const SizedBox(width: 24),
                             Expanded(child: registerForm),
                           ],
@@ -94,9 +114,20 @@ class _RegisterPageState extends State<RegisterPage> {
                       }
 
                       return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const AuthBrandPanel(),
+                          const AuthCenterLogo(
+                            caption: 'Join Writdle',
+                            description:
+                                'Create your account and keep the brand identity centered and clear from the first screen.',
+                          ),
+                          const SizedBox(height: 24),
+                          const AuthBrandPanel(
+                            centered: true,
+                            title: 'Create a stronger start',
+                            subtitle:
+                                'Join your writing, planning, and daily challenge flow in one smart space.',
+                          ),
                           const SizedBox(height: 24),
                           const RegisterHighlights(),
                           const SizedBox(height: 24),
@@ -146,7 +177,8 @@ class _RegisterForm extends StatelessWidget {
       builder: (context, state) {
         return RegisterFormCard(
           title: 'Create your account',
-          subtitle: 'Join your writing, planning, and daily challenge flow in one smart space.',
+          subtitle:
+              'Join your writing, planning, and daily challenge flow in one smart space.',
           child: Column(
             children: [
               AuthInputField(
@@ -168,7 +200,8 @@ class _RegisterForm extends StatelessWidget {
                 icon: Icons.lock_outline,
                 obscureText: !state.showPassword,
                 suffix: IconButton(
-                  onPressed: () => context.read<RegisterCubit>().togglePasswordVisibility(),
+                  onPressed: () =>
+                      context.read<RegisterCubit>().togglePasswordVisibility(),
                   icon: Icon(
                     state.showPassword ? Icons.visibility_off : Icons.visibility,
                   ),
@@ -182,9 +215,13 @@ class _RegisterForm extends StatelessWidget {
                 obscureText: !state.showConfirmPassword,
                 onSubmitted: (_) => onSubmit(),
                 suffix: IconButton(
-                  onPressed: () => context.read<RegisterCubit>().toggleConfirmPasswordVisibility(),
+                  onPressed: () => context
+                      .read<RegisterCubit>()
+                      .toggleConfirmPasswordVisibility(),
                   icon: Icon(
-                    state.showConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    state.showConfirmPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                   ),
                 ),
               ),
