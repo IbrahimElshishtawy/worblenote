@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/core/notifications/local_notification_service.dart';
+import 'package:writdle/core/theme/app_theme.dart';
 import 'package:writdle/data/repositories/auth_repository_impl.dart';
 import 'package:writdle/data/repositories/note_repository_impl.dart';
 import 'package:writdle/data/repositories/profile_repository_impl.dart';
@@ -16,6 +17,7 @@ import 'package:writdle/presentation/bloc/auth_cubit.dart';
 import 'package:writdle/presentation/bloc/notes_cubit.dart';
 import 'package:writdle/presentation/bloc/profile_cubit.dart';
 import 'package:writdle/presentation/bloc/tasks_cubit.dart';
+import 'package:writdle/presentation/bloc/theme_cubit.dart';
 import 'package:writdle/presentation/screens/Splash_Screen_page.dart';
 import 'package:writdle/presentation/screens/activity_page.dart';
 import 'package:writdle/presentation/screens/games_page.dart';
@@ -73,39 +75,36 @@ class Writdle extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider(create: (_) => ThemeCubit()),
           BlocProvider(create: (_) => AppNotificationCubit()),
           BlocProvider(create: (_) => AuthCubit(authRepository)),
           BlocProvider(create: (_) => NotesCubit(noteRepository)),
           BlocProvider(create: (_) => TasksCubit(taskRepository, profileRepository)),
-          BlocProvider(
-            create: (_) => ProfileCubit(profileRepository, authRepository),
-          ),
+          BlocProvider(create: (_) => ProfileCubit(profileRepository, authRepository)),
         ],
         child: AppNotificationListener(
           scaffoldMessengerKey: _scaffoldMessengerKey,
-          child: MaterialApp(
-            title: 'Writdle App',
-            debugShowCheckedModeBanner: false,
-            scaffoldMessengerKey: _scaffoldMessengerKey,
-            theme: ThemeData(
-              useMaterial3: true,
-              brightness: Brightness.dark,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.indigo,
-                brightness: Brightness.dark,
-              ),
-              appBarTheme: const AppBarTheme(centerTitle: true),
-            ),
-            initialRoute: '/splash',
-            routes: {
-              '/splash': (_) => const SplashScreen(),
-              '/home': (_) => const HomePage(),
-              '/login': (_) => const LoginPage(),
-              '/register': (_) => const RegisterPage(),
-              '/activity': (_) => const ActivityPage(),
-              '/notes': (_) => const NotesPage(),
-              '/games': (_) => const WordlePage(),
-              '/calendar': (_) => TasksPage(selectedDay: DateTime.now()),
+          child: BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, themeMode) {
+              return MaterialApp(
+                title: 'Writdle App',
+                debugShowCheckedModeBanner: false,
+                scaffoldMessengerKey: _scaffoldMessengerKey,
+                theme: AppTheme.light(),
+                darkTheme: AppTheme.dark(),
+                themeMode: themeMode,
+                initialRoute: '/splash',
+                routes: {
+                  '/splash': (_) => const SplashScreen(),
+                  '/home': (_) => const HomePage(),
+                  '/login': (_) => const LoginPage(),
+                  '/register': (_) => const RegisterPage(),
+                  '/activity': (_) => const ActivityPage(),
+                  '/notes': (_) => const NotesPage(),
+                  '/games': (_) => const WordlePage(),
+                  '/calendar': (_) => TasksPage(selectedDay: DateTime.now()),
+                },
+              );
             },
           ),
         ),

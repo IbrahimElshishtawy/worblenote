@@ -3,7 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:writdle/core/notifications/app_notification.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/domain/repositories/auth_repository.dart';
+import 'package:writdle/presentation/bloc/auth_cubit.dart';
 import 'package:writdle/presentation/bloc/login_cubit.dart';
+import 'package:writdle/presentation/bloc/theme_cubit.dart';
+import 'package:writdle/presentation/widgets/auth/auth_brand_panel.dart';
+import 'package:writdle/presentation/widgets/auth/auth_input_field.dart';
+import 'package:writdle/presentation/widgets/auth/login_form_card.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,112 +32,185 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => LoginCubit(context.read<IAuthRepository>()),
-      child: BlocListener<LoginCubit, LoginState>(
-        listener: (context, state) {
-          if (state.isSuccess) {
-            context.read<AppNotificationCubit>().show(
-              'Logged in successfully!',
-              type: AppNotificationType.success,
-            );
-            context.read<LoginCubit>().clearStatus();
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (state.errorMessage != null) {
-            context.read<AppNotificationCubit>().show(
-              state.errorMessage!,
-              type: AppNotificationType.error,
-            );
-            context.read<LoginCubit>().clearStatus();
-          }
-        },
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<LoginCubit, LoginState>(
+            listener: (context, state) {
+              if (_emailController.text.isEmpty && state.savedEmail.isNotEmpty) {
+                _emailController.text = state.savedEmail;
+              }
+              if (state.isSuccess) {
+                context.read<AppNotificationCubit>().show(
+                  'Logged in successfully!',
+                  type: AppNotificationType.success,
+                );
+                context.read<LoginCubit>().clearStatus();
+                Navigator.pushReplacementNamed(context, '/home');
+              } else if (state.errorMessage != null) {
+                context.read<AppNotificationCubit>().show(
+                  state.errorMessage!,
+                  type: AppNotificationType.error,
+                );
+                context.read<LoginCubit>().clearStatus();
+              }
+            },
+          ),
+          BlocListener<AuthCubit, AuthState>(
+            listenWhen: (previous, current) => current.isAuthenticated,
+            listener: (context, state) {
+              if (ModalRoute.of(context)?.settings.name == '/login') {
+                Navigator.pushReplacementNamed(context, '/home');
+              }
+            },
+          ),
+        ],
         child: Scaffold(
-          body: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-              child: BlocBuilder<LoginCubit, LoginState>(
-                builder: (context, state) {
-                  final colorScheme = Theme.of(context).colorScheme;
-                  return ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(60),
-                          child: Image.asset(
-                            'assets/image/WR-Logo-1.jpg',
-                            height: 100,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        Text(
-                          'Welcome Back',
-                          style: Theme.of(context).textTheme.displaySmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Login to continue your journey',
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
-                        ),
-                        const SizedBox(height: 48),
-                        TextField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email_outlined),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: !state.showPassword,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              onPressed: () {
-                                context.read<LoginCubit>().togglePasswordVisibility();
-                              },
-                              icon: Icon(
-                                state.showPassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        ElevatedButton(
-                          onPressed: state.isLoading
-                              ? null
-                              : () {
-                                  context.read<LoginCubit>().login(
-                                    email: _emailController.text,
-                                    password: _passwordController.text,
-                                  );
-                                },
-                          child: state.isLoading
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Login'),
-                        ),
-                        const SizedBox(height: 24),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/register');
-                          },
-                          child: const Text('Don\'t have an account? Register'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+          appBar: AppBar(
+            actions: [
+              IconButton(
+                tooltip: 'Toggle theme',
+                onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+                icon: const Icon(Icons.brightness_6_outlined),
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1040),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 860;
+                      final form = _LoginForm(
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        onSubmit: () => _submit(context),
+                      );
+
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Expanded(child: AuthBrandPanel()),
+                            const SizedBox(width: 28),
+                            Expanded(child: form),
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const AuthBrandPanel(),
+                          const SizedBox(height: 28),
+                          form,
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _submit(BuildContext context) {
+    FocusScope.of(context).unfocus();
+    context.read<LoginCubit>().login(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+  }
+}
+
+class _LoginForm extends StatelessWidget {
+  const _LoginForm({
+    required this.emailController,
+    required this.passwordController,
+    required this.onSubmit,
+  });
+
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LoginCubit, LoginState>(
+      builder: (context, state) {
+        return LoginFormCard(
+          title: 'Sign in to your account',
+          subtitle:
+              'Clean login flow with validation, saved session, and theme support.',
+          child: Column(
+            children: [
+              AuthInputField(
+                controller: emailController,
+                label: 'Email',
+                icon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              AuthInputField(
+                controller: passwordController,
+                label: 'Password',
+                icon: Icons.lock_outline,
+                obscureText: !state.showPassword,
+                onSubmitted: (_) => onSubmit(),
+                suffix: IconButton(
+                  onPressed: () => context.read<LoginCubit>().togglePasswordVisibility(),
+                  icon: Icon(
+                    state.showPassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Checkbox(
+                    value: state.rememberMe,
+                    onChanged: (value) {
+                      context.read<LoginCubit>().toggleRememberMe(value ?? true);
+                    },
+                  ),
+                  const Text('Remember me'),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      context.read<AppNotificationCubit>().show(
+                        'Forgot password flow can be added next.',
+                        type: AppNotificationType.info,
+                      );
+                    },
+                    child: const Text('Need help?'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton(
+                onPressed: state.isLoading ? null : onSubmit,
+                child: state.isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Login'),
+              ),
+              const SizedBox(height: 18),
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/register'),
+                child: const Text('Don\'t have an account? Register'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,8 +1,7 @@
-// ignore_for_file: file_names, use_build_context_synchronously
-
 import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,35 +12,31 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+  late final AnimationController _animationController;
+  late final Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-
-    // تحريك Fade In
     _animationController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
-    );
-
+    )..forward();
     _fadeAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     );
 
-    _animationController.forward();
-
-    // بعد 3 ثواني ينقل لصفحة تانية
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 3), navigateNext);
+      Future.delayed(const Duration(seconds: 2), _navigateNext);
     });
   }
 
-  Future<void> navigateNext() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  Future<void> _navigateNext() async {
+    if (!mounted) {
+      return;
+    }
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
     Navigator.pushReplacementNamed(context, isLoggedIn ? '/home' : '/login');
   }
 
@@ -53,28 +48,40 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.black, // خلفية سوداء بالكامل
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/icon/w-logo-image_332120.jpg',
+              Container(
                 width: 160,
                 height: 160,
-                fit: BoxFit.contain,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(36),
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.colorScheme.primary,
+                      theme.colorScheme.secondary,
+                    ],
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.asset(
+                    'assets/icon/w-logo-image_332120.jpg',
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "Writdle",
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white70,
-                  letterSpacing: 1.2,
+              Text(
+                'Writdle',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
