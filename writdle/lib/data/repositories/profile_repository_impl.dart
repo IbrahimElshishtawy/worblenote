@@ -21,10 +21,27 @@ class ProfileRepositoryImpl implements IProfileRepository {
       return null;
     }
 
+    final joinedAtRaw = data['createdAt'];
     return ProfileData(
       name: data['name'] as String? ?? 'No Name',
       email: data['email'] as String? ?? 'No Email',
+      bio: data['bio'] as String? ?? '',
+      joinedAt: joinedAtRaw is Timestamp ? joinedAtRaw.toDate() : null,
     );
+  }
+
+  @override
+  Future<void> updateProfile(ProfileData profile) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      return;
+    }
+
+    await _firestore.collection('users').doc(userId).set({
+      'name': profile.name,
+      'email': profile.email,
+      'bio': profile.bio,
+    }, SetOptions(merge: true));
   }
 
   @override

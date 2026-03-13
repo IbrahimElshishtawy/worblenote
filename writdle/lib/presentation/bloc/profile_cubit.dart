@@ -13,31 +13,35 @@ class ProfileState {
     this.stats = const UserStatsSummary(),
     this.currentDateTime = '',
     this.isLoading = true,
+    this.isSaving = false,
   });
 
   final ProfileData? profile;
   final UserStatsSummary stats;
   final String currentDateTime;
   final bool isLoading;
+  final bool isSaving;
 
   ProfileState copyWith({
     ProfileData? profile,
     UserStatsSummary? stats,
     String? currentDateTime,
     bool? isLoading,
+    bool? isSaving,
   }) {
     return ProfileState(
       profile: profile ?? this.profile,
       stats: stats ?? this.stats,
       currentDateTime: currentDateTime ?? this.currentDateTime,
       isLoading: isLoading ?? this.isLoading,
+      isSaving: isSaving ?? this.isSaving,
     );
   }
 }
 
 class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit(this._profileRepository, this._authRepository)
-    : super(const ProfileState());
+      : super(const ProfileState());
 
   final IProfileRepository _profileRepository;
   final IAuthRepository _authRepository;
@@ -59,6 +63,20 @@ class ProfileCubit extends Cubit<ProfileState> {
     _clockTimer ??= Timer.periodic(const Duration(seconds: 1), (_) {
       emit(state.copyWith(currentDateTime: _formatNow()));
     });
+  }
+
+  Future<void> saveProfile({
+    required String name,
+    required String bio,
+  }) async {
+    final current = state.profile;
+    if (current == null) {
+      return;
+    }
+    emit(state.copyWith(isSaving: true));
+    final updated = current.copyWith(name: name.trim(), bio: bio.trim());
+    await _profileRepository.updateProfile(updated);
+    emit(state.copyWith(profile: updated, isSaving: false));
   }
 
   Future<void> logout() async {
