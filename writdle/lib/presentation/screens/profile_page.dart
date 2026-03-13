@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:writdle/data/profile_stats_card.dart';
+import 'package:writdle/core/notifications/app_notification.dart';
+import 'package:writdle/core/notifications/app_notification_cubit.dart';
+import 'package:writdle/domain/entities/profile_data.dart';
+import 'package:writdle/domain/entities/user_stats_summary.dart';
+import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 import 'package:writdle/presentation/bloc/profile_cubit.dart';
+import 'package:writdle/presentation/widgets/profile/profile_activity_panel.dart';
+import 'package:writdle/presentation/widgets/profile/profile_edit_sheet.dart';
+import 'package:writdle/presentation/widgets/profile/profile_highlight_panel.dart';
+import 'package:writdle/presentation/widgets/profile/profile_metric_card.dart';
+import 'package:writdle/presentation/widgets/profile/profile_overview_card.dart';
+import 'package:writdle/presentation/widgets/profile/profile_shell_background.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -22,9 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
         title: const Text('My Profile'),
         actions: [
           IconButton(
@@ -43,102 +51,201 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: BlocBuilder<ProfileCubit, ProfileState>(
+      body: BlocConsumer<ProfileCubit, ProfileState>(
+        listenWhen: (previous, current) => previous.isSaving && !current.isSaving,
+        listener: (context, state) {
+          context.read<AppNotificationCubit>().show(
+                'Profile updated successfully.',
+                type: AppNotificationType.success,
+              );
+        },
         builder: (context, state) {
           if (state.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final profile = state.profile;
-          final stats = state.stats;
-          final progress = stats.completedTasks == 0 ? 0.0 : 1.0;
+          return ProfileShellBackground(
+            child: RefreshIndicator(
+              onRefresh: () => context.read<ProfileCubit>().loadProfile(),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final horizontalPadding =
+                      constraints.maxWidth >= 900 ? 32.0 : 20.0;
 
-          return RefreshIndicator(
-            onRefresh: () => context.read<ProfileCubit>().loadProfile(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    state.currentDateTime,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.deepPurple, width: 3),
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      12,
+                      horizontalPadding,
+                      32,
                     ),
-                    padding: const EdgeInsets.all(3),
-                    child: const CircleAvatar(
-                      radius: 55,
-                      backgroundImage: AssetImage(
-                        'assets/icon/w-logo-image_332120.jpg',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    profile?.name ?? 'Guest',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    profile?.email ?? '',
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  ProfileStatsCard(
-                    completedTasks: stats.completedTasks,
-                    totalTasks: stats.completedTasks,
-                    losses: stats.losses,
-                    progress: progress,
-                    winRate: stats.winRate,
-                  ),
-                  const SizedBox(height: 24),
-                  if (stats.completedTaskTitles.isEmpty)
-                    const Text(
-                      'No completed tasks yet today.',
-                      style: TextStyle(color: Colors.white60),
-                    )
-                  else
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: stats.completedTaskTitles
-                          .map(
-                            (title) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.check,
-                                    color: Colors.green,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      title,
-                                      style: const TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ],
+                    children: [
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1080),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _AnimatedSection(
+                                index: 0,
+                                child: ProfileOverviewCard(
+                                  profile: state.profile,
+                                  currentDateTime: state.currentDateTime,
+                                  onEdit: state.profile == null
+                                      ? () {}
+                                      : () => _showEditProfileSheet(
+                                            context,
+                                            state.profile!,
+                                          ),
+                                ),
                               ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                ],
+                              const SizedBox(height: 20),
+                              _ResponsiveMetricGrid(stats: state.stats),
+                              const SizedBox(height: 20),
+                              _AnimatedSection(
+                                index: 5,
+                                child: ProfileHighlightPanel(stats: state.stats),
+                              ),
+                              const SizedBox(height: 20),
+                              _AnimatedSection(
+                                index: 6,
+                                child: ProfileActivityPanel(
+                                  activities: state.stats.completedTaskTitles,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Future<void> _showEditProfileSheet(
+    BuildContext context,
+    ProfileData profile,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      showDragHandle: false,
+      builder: (_) => ProfileEditSheet(profile: profile),
+    );
+  }
+}
+
+class _ResponsiveMetricGrid extends StatelessWidget {
+  const _ResponsiveMetricGrid({
+    required this.stats,
+  });
+
+  final UserStatsSummary stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final cards = [
+      ProfileMetricCard(
+        title: 'Total Games',
+        value: '${stats.totalGames}',
+        caption: 'Daily challenge runs tracked',
+        icon: Icons.sports_esports_rounded,
+        color: scheme.primary,
+      ),
+      ProfileMetricCard(
+        title: 'Wins',
+        value: '${stats.totalWins}',
+        caption: 'Completed with success',
+        icon: Icons.emoji_events_rounded,
+        color: const Color(0xFFDAA520),
+      ),
+      ProfileMetricCard(
+        title: 'Completed Tasks',
+        value: '${stats.completedTasks}',
+        caption: 'Productivity wins inside the app',
+        icon: Icons.task_alt_rounded,
+        color: scheme.tertiary,
+      ),
+      ProfileMetricCard(
+        title: 'Losses',
+        value: '${stats.losses}',
+        caption: 'Rounds to improve next time',
+        icon: Icons.trending_up_rounded,
+        color: scheme.error,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth >= 980
+            ? 4
+            : constraints.maxWidth >= 640
+                ? 2
+                : 1;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: cards.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 14,
+            crossAxisSpacing: 14,
+            childAspectRatio: crossAxisCount == 1 ? 2.35 : 1.05,
+          ),
+          itemBuilder: (context, index) {
+            return _AnimatedSection(
+              index: index + 1,
+              child: cards[index],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _AnimatedSection extends StatelessWidget {
+  const _AnimatedSection({
+    required this.index,
+    required this.child,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = context.select<AppSettingsCubit, bool>(
+      (cubit) => cubit.state.reduceMotion,
+    );
+
+    if (reduceMotion) {
+      return child;
+    }
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 320 + (index * 110)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, _) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 18 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
