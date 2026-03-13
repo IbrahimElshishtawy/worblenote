@@ -1,16 +1,30 @@
 # writdle
 
-A new Flutter project.
+Flutter productivity app with Firebase integration.
 
-## Getting Started
+## CI/CD
 
-This project is a starting point for a Flutter application.
+This project now includes GitHub Actions workflows for:
 
-A few resources to get you started if this is your first Flutter project:
+- `CI`: format check, `flutter analyze`, `flutter test`, and `flutter build web`
+- `CD`: Firebase Hosting preview deploys for pull requests and live deploys from `main`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Required GitHub Secrets
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Add this repository secret before using deployment:
+
+- `FIREBASE_SERVICE_ACCOUNT_WRITDLE`: Firebase service account JSON for the `writdle` project
+
+### Deployment Flow
+
+1. Every pull request runs CI and creates a Firebase Hosting preview URL.
+2. Every push to `main` runs CI and deploys the web build to the live Firebase Hosting channel.
+
+### Local Commands
+
+```bash
+flutter pub get
+flutter analyze
+flutter test
+flutter build web --release
+```
