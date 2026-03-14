@@ -8,7 +8,7 @@ Notes · Tasks · Wordle Game · Bilingual · Local Notifications · Profile Per
 
 <br/>
 
-<img src="assets/github/writdle-v2-showcase.png" alt="Writdle V2 Showcase" width="100%" />
+<img src="writdle/assets/github/photo_2026-03-14_04-59-24.jpg" alt="Writdle V2 Showcase" width="100%" />
 
 <br/>
 
