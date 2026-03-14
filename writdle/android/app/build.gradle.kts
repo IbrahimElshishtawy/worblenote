@@ -1,9 +1,9 @@
-plugins {
+﻿plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") 
-    }
+    id("com.google.gms.google-services")
+}
 
 android {
     namespace = "com.example.writdle"
@@ -30,7 +30,9 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug") // 👈 استخدم مفتاح حقيقي لاحقًا
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }

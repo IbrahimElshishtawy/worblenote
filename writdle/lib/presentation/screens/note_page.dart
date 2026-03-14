@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/presentation/widgets/note_list.dart';
 import 'package:writdle/presentation/widgets/notes/notes_header.dart';
 import 'package:writdle/presentation/widgets/notes/notes_search_bar.dart';
@@ -34,7 +33,8 @@ class _NotesPageState extends State<NotesPage> {
   String get _dateKey =>
       '${_selectedDate.year.toString().padLeft(4, '0')}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
 
-  String get _displayDate => DateFormat('EEEE, d MMMM yyyy').format(_selectedDate);
+  String get _displayDate =>
+      DateFormat('EEEE, d MMMM yyyy').format(_selectedDate);
   String get _deviceTime => DateFormat('hh:mm a').format(DateTime.now());
 
   void _goToPreviousDay() {
@@ -83,14 +83,12 @@ class _NotesPageState extends State<NotesPage> {
                 padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
                 child: NotesSearchBar(
                   controller: _searchController,
-                  onChanged: (value) => setState(() => _searchQuery = value.trim()),
+                  onChanged: (value) =>
+                      setState(() => _searchQuery = value.trim()),
                 ),
               ),
               Expanded(
-                child: NoteList(
-                  date: _dateKey,
-                  searchQuery: _searchQuery,
-                ),
+                child: NoteList(date: _dateKey, searchQuery: _searchQuery),
               ),
             ],
           ),
