@@ -22,6 +22,16 @@ class TaskRepositoryImpl implements ITaskRepository {
   }
 
   @override
+  Future<List<TaskModel>> getAllTasks() async {
+    final userId = await LocalAuthStore.getCurrentUserId();
+    if (userId == null) {
+      return [];
+    }
+
+    return _localCache.readAllTasks(userId);
+  }
+
+  @override
   Future<TaskModel> addTask(TaskModel task) async {
     final userId = await LocalAuthStore.getCurrentUserId();
     if (userId == null) {

@@ -5,9 +5,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StatsPage extends StatefulWidget {
-  final int resultAttempt; // 1, 2, 3, 4 or 0 if failed
-
   const StatsPage({super.key, required this.resultAttempt});
+
+  final int resultAttempt;
 
   @override
   State<StatsPage> createState() => _StatsPageState();
@@ -32,197 +32,457 @@ class _StatsPageState extends State<StatsPage> {
     await prefs.remove('win3');
     await prefs.remove('win4');
     await prefs.remove('total_losses');
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
-    setState(() {}); // إعادة تحميل البيانات بعد الحذف
+  Future<void> _confirmReset() async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final scheme = theme.colorScheme;
+
+        return AlertDialog(
+          backgroundColor: scheme.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          title: Text(
+            'Reset statistics',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          content: Text(
+            'This will clear all saved Wordle performance data on this device.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: scheme.error,
+                foregroundColor: scheme.onError,
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                await _resetStats();
+              },
+              child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> labels = [
-      "1st Attempt",
-      "2nd Attempt",
-      "3rd Attempt",
-      "4th Attempt",
-      "Failed",
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    final labels = <String>[
+      '1st attempt',
+      '2nd attempt',
+      '3rd attempt',
+      '4th attempt',
+      'Missed round',
     ];
 
-    final List<IconData> icons = [
-      LucideIcons.star,
-      LucideIcons.starHalf,
-      LucideIcons.edit2,
-      LucideIcons.clock,
-      LucideIcons.x,
+    final icons = <IconData>[
+      LucideIcons.badgeCheck,
+      LucideIcons.sparkles,
+      LucideIcons.target,
+      LucideIcons.timerReset,
+      LucideIcons.circleOff,
     ];
 
-    final List<Color> colors = [
-      Colors.green,
-      Colors.lightGreen,
-      Colors.amber,
-      Colors.orange,
-      Colors.red,
+    final colors = <Color>[
+      const Color(0xFF16A34A),
+      const Color(0xFF22C55E),
+      const Color(0xFFF59E0B),
+      const Color(0xFFF97316),
+      const Color(0xFFEF4444),
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          "Today's Statistics",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            tooltip: 'Reset statistics',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: const Color(0xFF1E1E1E),
-                  title: const Text(
-                    "Reset Statistics",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  content: const Text(
-                    "Are you sure you want to reset all statistics?",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        "Cancel",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        await _resetStats();
-                      },
-                      child: const Text(
-                        "Reset",
-                        style: TextStyle(color: Colors.redAccent),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: FutureBuilder<List<int>>(
-        future: _loadStats(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      backgroundColor: scheme.surface,
+      body: SafeArea(
+        child: FutureBuilder<List<int>>(
+          future: _loadStats(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final values = snapshot.data!;
-          final totalGames = values.fold(0, (sum, val) => sum + val);
-          final totalWins = values.sublist(0, 4).reduce((a, b) => a + b);
-          final totalFails = values[4];
-          final winRate = totalGames == 0
-              ? 0
-              : (totalWins / totalGames * 100).round();
+            final values = snapshot.data!;
+            final totalGames = values.fold(0, (sum, val) => sum + val);
+            final totalWins = values.take(4).fold(0, (sum, val) => sum + val);
+            final totalLosses = values[4];
+            final winRate = totalGames == 0
+                ? 0
+                : ((totalWins / totalGames) * 100).round();
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            final latestLabel = widget.resultAttempt > 0
+                ? 'Solved in ${widget.resultAttempt}'
+                : 'No result yet';
+
+            return Column(
               children: [
-                Text(
-                  "Total Games Played: $totalGames",
-                  style: const TextStyle(fontSize: 18, color: Colors.white70),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "✅ Total Wins: $totalWins",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.greenAccent,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "❌ Total Failures: $totalFails",
-                  style: const TextStyle(fontSize: 18, color: Colors.redAccent),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "📊 Win Rate: $winRate%",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.lightBlueAccent,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Divider(color: Colors.grey),
-                const SizedBox(height: 10),
-
-                for (int i = 0; i < labels.length; i++) ...[
-                  Row(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 10, 12, 8),
+                  child: Row(
                     children: [
-                      Icon(icons[i], color: colors[i], size: 22),
-                      const SizedBox(width: 8),
-                      Text(
-                        "${labels[i]} - ${values[i]} times",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                      Container(
+                        width: 40,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: scheme.outlineVariant,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        tooltip: 'Reset statistics',
+                        onPressed: _confirmReset,
+                        icon: Icon(
+                          Icons.delete_outline_rounded,
+                          color: scheme.error,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: LinearProgressIndicator(
-                      value: totalGames == 0 ? 0 : values[i] / totalGames,
-                      minHeight: 18,
-                      backgroundColor: Colors.grey.shade800,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        values[i] > 0 ? colors[i] : Colors.grey,
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(26),
+                          gradient: LinearGradient(
+                            colors: [
+                              scheme.primary,
+                              scheme.secondary,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Match State',
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: scheme.onPrimary.withValues(alpha: 0.82),
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Performance Overview',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: scheme.onPrimary,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Your local Wordle record, win spread, and latest round summary.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: scheme.onPrimary.withValues(alpha: 0.9),
+                                height: 1.35,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                _HeroBadge(
+                                  label: 'Win Rate',
+                                  value: '$winRate%',
+                                  color: scheme.onPrimary,
+                                ),
+                                _HeroBadge(
+                                  label: 'Latest',
+                                  value: latestLabel,
+                                  color: scheme.onPrimary,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _SummaryCard(
+                              title: 'Games',
+                              value: '$totalGames',
+                              icon: LucideIcons.gamepad2,
+                              accent: scheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _SummaryCard(
+                              title: 'Wins',
+                              value: '$totalWins',
+                              icon: LucideIcons.trophy,
+                              accent: const Color(0xFF16A34A),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _SummaryCard(
+                              title: 'Losses',
+                              value: '$totalLosses',
+                              icon: Icons.close_rounded,
+                              accent: scheme.error,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        'Attempt Breakdown',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'See how often you finish in each round window.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      ...List.generate(labels.length, (index) {
+                        final value = values[index];
+                        final ratio = totalGames == 0 ? 0.0 : value / totalGames;
 
-                const SizedBox(height: 16),
-
-                /// ✅ زر العودة
-                Center(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _AttemptStatTile(
+                            label: labels[index],
+                            value: value,
+                            progress: ratio,
+                            icon: icons[index],
+                            color: colors[index],
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 6),
+                      OutlinedButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                        icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                        label: const Text('Back to game'),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.calendar_today, color: Colors.white),
-                    label: const Text(
-                      "Come back tomorrow for a new word",
-                      style: TextStyle(fontSize: 16),
-                    ),
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 30),
               ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroBadge extends StatelessWidget {
+  const _HeroBadge({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color.withValues(alpha: 0.78),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
             ),
-          );
-        },
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.accent,
+  });
+
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 18, color: accent),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            value,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            title,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttemptStatTile extends StatelessWidget {
+  const _AttemptStatTile({
+    required this.label,
+    required this.value,
+    required this.progress,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final int value;
+  final double progress;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.38),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 18, color: color),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Text(
+                '$value',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              minHeight: 10,
+              value: progress,
+              backgroundColor: scheme.surface,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/utils/date_formatter.dart';
 import 'package:writdle/presentation/bloc/profile_cubit.dart';
 import 'package:writdle/presentation/bloc/tasks_cubit.dart';
@@ -48,6 +49,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -80,13 +82,13 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
                       children: [
                         DashboardHero(
-                          userName: profileState.profile?.name ?? 'Writer',
+                          userName: profileState.profile?.name ?? l10n.t('writer'),
                           onProfileTap: widget.onOpenProfile,
                         ),
                         const SizedBox(height: 22),
-                        const SectionTitle(
-                          title: 'Quick Focus',
-                          subtitle: 'Move fast between your core spaces.',
+                        SectionTitle(
+                          title: l10n.t('quick_focus'),
+                          subtitle: l10n.t('quick_focus_subtitle'),
                         ),
                         const SizedBox(height: 14),
                         Wrap(
@@ -94,22 +96,22 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                           runSpacing: 14,
                           children: [
                             QuickActionCard(
-                              title: 'Play Wordle',
-                              subtitle: 'Warm up your mind with today\'s challenge.',
+                              title: l10n.t('play_wordle'),
+                              subtitle: l10n.t('play_wordle_subtitle'),
                               icon: Icons.auto_awesome,
                               accent: const Color(0xFF0F766E),
                               onTap: widget.onOpenWordle,
                             ),
                             QuickActionCard(
-                              title: 'Open Notes',
-                              subtitle: 'Capture ideas before they fade.',
+                              title: l10n.t('open_notes'),
+                              subtitle: l10n.t('open_notes_subtitle'),
                               icon: Icons.edit_note_rounded,
                               accent: const Color(0xFF7C3AED),
                               onTap: widget.onOpenNotes,
                             ),
                             QuickActionCard(
-                              title: 'View Activity',
-                              subtitle: 'Track your progress for today.',
+                              title: l10n.t('view_activity'),
+                              subtitle: l10n.t('view_activity_subtitle'),
                               icon: Icons.insights_rounded,
                               accent: const Color(0xFFEA580C),
                               onTap: widget.onOpenActivity,
@@ -117,9 +119,9 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                           ],
                         ),
                         const SizedBox(height: 26),
-                        const SectionTitle(
-                          title: 'Today Snapshot',
-                          subtitle: 'A compact pulse on your momentum.',
+                        SectionTitle(
+                          title: l10n.t('today_snapshot'),
+                          subtitle: l10n.t('today_snapshot_subtitle'),
                         ),
                         const SizedBox(height: 14),
                         GridView.count(
@@ -133,32 +135,32 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                               MediaQuery.of(context).size.width > 760 ? 1.08 : 0.96,
                           children: [
                             StatCard(
-                              label: 'Completed',
+                              label: l10n.t('completed'),
                               value: '$completedTasks',
-                              helper: 'Tasks done today',
+                              helper: l10n.t('tasks_done_today'),
                               icon: Icons.check_circle,
                               color: const Color(0xFF15803D),
                             ),
                             StatCard(
-                              label: 'Remaining',
+                              label: l10n.t('remaining'),
                               value: '$remainingTasks',
-                              helper: 'Tasks still open',
+                              helper: l10n.t('tasks_still_open'),
                               icon: Icons.schedule,
                               color: const Color(0xFFEA580C),
                             ),
                             StatCard(
-                              label: 'Win Rate',
+                              label: l10n.t('win_rate'),
                               value: '$winRate%',
-                              helper: 'Game performance',
+                              helper: l10n.t('game_performance'),
                               icon: Icons.bar_chart_rounded,
                               color: const Color(0xFF2563EB),
                             ),
                           ],
                         ),
                         const SizedBox(height: 26),
-                        const SectionTitle(
-                          title: 'Recent Wins',
-                          subtitle: 'Small highlights keep the rhythm going.',
+                        SectionTitle(
+                          title: l10n.t('recent_wins'),
+                          subtitle: l10n.t('recent_wins_subtitle'),
                         ),
                         const SizedBox(height: 14),
                         RecentWinsCard(

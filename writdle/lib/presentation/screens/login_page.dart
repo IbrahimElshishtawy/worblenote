@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:writdle/core/auth/local_auth_store.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/notifications/app_notification.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/presentation/bloc/theme_cubit.dart';
@@ -30,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       context.read<AppNotificationCubit>().show(
-            'Please enter your name first.',
+            context.l10n.t('note_title_required'),
             type: AppNotificationType.error,
           );
       return;
@@ -48,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
       context.read<AppNotificationCubit>().show(
-            'Profile saved on this device.',
+            context.l10n.t('profile_saved_local'),
             type: AppNotificationType.success,
           );
       Navigator.pushReplacementNamed(context, '/home');
@@ -57,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
       context.read<AppNotificationCubit>().show(
-            'Unable to save your profile right now.',
+            context.l10n.t('profile_save_failed'),
             type: AppNotificationType.error,
           );
     } finally {
@@ -69,13 +70,14 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         leading: const SizedBox.shrink(),
         leadingWidth: 0,
         actions: [
           IconButton(
-            tooltip: 'Toggle theme',
+            tooltip: l10n.t('theme_mode'),
             onPressed: () => context.read<ThemeCubit>().toggleTheme(),
             icon: const Icon(Icons.brightness_6_outlined),
           ),
@@ -100,19 +102,17 @@ class _LoginPageState extends State<LoginPage> {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: AuthBrandPanel(
-                            title: 'Start your local workspace',
-                            subtitle:
-                                'Create your device profile once, then continue straight into notes, tasks, and your daily game flow.',
+                            title: l10n.t('login_name_title'),
+                            subtitle: l10n.t('notes_header_subtitle'),
                           ),
                         ),
                         const SizedBox(width: 28),
-                        const Expanded(
+                        Expanded(
                           child: AuthCenterLogo(
-                            caption: 'Writdle Profile',
-                            description:
-                                'A lightweight local setup that keeps your app personal without a full login flow.',
+                            caption: l10n.t('my_profile'),
+                            description: l10n.t('notes_header_subtitle'),
                           ),
                         ),
                         const SizedBox(width: 28),
@@ -163,15 +163,16 @@ class _NameSetupForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return LoginFormCard(
-      title: 'Enter your name',
+      title: l10n.t('login_name_title'),
       subtitle:
-          'This profile is stored locally on your phone and will appear in your profile screen.',
+          l10n.t('notes_header_subtitle'),
       child: Column(
         children: [
           AuthInputField(
             controller: nameController,
-            label: 'Your name',
+            label: l10n.t('login_name_title'),
             icon: Icons.person_outline_rounded,
             onSubmitted: (_) => onSubmit(),
           ),
@@ -184,7 +185,7 @@ class _NameSetupForm extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             child: Text(
-              'Saved locally on this device. If you want to change it later, edit it from the profile page only.',
+              l10n.t('activity_saved_locally'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.45,
@@ -200,7 +201,7 @@ class _NameSetupForm extends StatelessWidget {
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Continue'),
+                : Text(l10n.t('continue')),
           ),
         ],
       ),

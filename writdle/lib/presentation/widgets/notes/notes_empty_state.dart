@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:writdle/core/app_localizations.dart';
 
 class NotesEmptyState extends StatelessWidget {
   const NotesEmptyState({super.key, required this.query});
@@ -7,6 +8,7 @@ class NotesEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final hasQuery = query.trim().isNotEmpty;
     return Center(
       child: Padding(
@@ -32,7 +34,9 @@ class NotesEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                hasQuery ? 'No matching notes' : 'No notes for this day yet',
+                hasQuery
+                    ? l10n.t('no_matching_notes')
+                    : l10n.t('no_notes_for_day_yet'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
@@ -41,8 +45,8 @@ class NotesEmptyState extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 hasQuery
-                    ? 'Try another keyword or clear the search.'
-                    : 'Start writing your first thought and it will appear here.',
+                    ? l10n.t('search_try_another')
+                    : l10n.t('write_first_note'),
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,

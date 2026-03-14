@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:writdle/core/app_localizations.dart';
 
 class NotesSearchBar extends StatelessWidget {
   const NotesSearchBar({
@@ -12,11 +13,12 @@ class NotesSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return TextField(
       controller: controller,
       onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: 'Search notes, ideas, keywords...',
+        hintText: l10n.t('search_notes_hint'),
         prefixIcon: const Icon(Icons.search_rounded),
         suffixIcon: controller.text.isEmpty
             ? null

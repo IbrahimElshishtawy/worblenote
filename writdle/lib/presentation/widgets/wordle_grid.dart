@@ -20,11 +20,12 @@ class WordleGrid extends StatelessWidget {
         final availableWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.of(context).size.width;
-        const spacing = 2.0;
-        final tileSize = ((availableWidth - (5 * 2 * spacing)) / 5)
-            .clamp(28.0, 48.0);
+        const horizontalSpacing = 5.0;
+        const verticalSpacing = 3.0;
+        final tileSize = ((availableWidth - (5 * 2 * horizontalSpacing)) / 5)
+            .clamp(26.0, 46.0);
 
-        final gridWidth = (tileSize * 5) + (5 * 2 * spacing);
+        final gridWidth = (tileSize * 5) + (5 * 2 * horizontalSpacing);
 
         return FittedBox(
           fit: BoxFit.scaleDown,
@@ -42,7 +43,10 @@ class WordleGrid extends StatelessWidget {
                     final status = results[row][col];
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
-                      margin: const EdgeInsets.all(spacing),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: horizontalSpacing,
+                        vertical: verticalSpacing,
+                      ),
                       width: tileSize,
                       height: tileSize,
                       decoration: BoxDecoration(

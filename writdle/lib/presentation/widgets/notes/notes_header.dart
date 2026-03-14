@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:writdle/core/app_localizations.dart';
 
 class NotesHeader extends StatelessWidget {
   const NotesHeader({
@@ -16,6 +17,7 @@ class NotesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -36,7 +38,7 @@ class NotesHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your Notes',
+            l10n.t('notes'),
             style: theme.textTheme.titleMedium?.copyWith(
               color: scheme.onPrimary,
               fontWeight: FontWeight.w800,
@@ -44,7 +46,7 @@ class NotesHeader extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Local notes by phone date.',
+            l10n.t('notes_header_subtitle'),
             style: theme.textTheme.labelMedium?.copyWith(
               color: scheme.onPrimary.withValues(alpha: 0.86),
               height: 1.2,
@@ -61,7 +63,7 @@ class NotesHeader extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'Device local',
+                    l10n.t('device_local'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: scheme.onPrimary,

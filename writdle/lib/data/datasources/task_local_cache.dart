@@ -27,6 +27,32 @@ class TaskLocalCache {
     );
   }
 
+  Future<List<TaskModel>> readAllTasks(String userId) async {
+    final preferences = await SharedPreferences.getInstance();
+    final keys = preferences.getKeys();
+    final allTasks = <TaskModel>[];
+
+    for (final key in keys) {
+      if (!key.startsWith('$_tasksPrefix$userId\_')) {
+        continue;
+      }
+
+      final raw = preferences.getString(key);
+      if (raw == null || raw.isEmpty) {
+        continue;
+      }
+
+      final decoded = jsonDecode(raw) as List<dynamic>;
+      allTasks.addAll(
+        decoded
+            .map((item) => TaskModel.fromJson(item as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+
+    return allTasks;
+  }
+
   Future<List<Map<String, dynamic>>> readQueue(String userId) async {
     final preferences = await SharedPreferences.getInstance();
     final raw = preferences.getString('$_queuePrefix$userId');

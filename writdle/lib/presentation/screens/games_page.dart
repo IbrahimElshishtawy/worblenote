@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_navigation.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/notifications/app_notification.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/data/datasources/game_stats_service.dart';
@@ -111,7 +113,7 @@ class _WordlePageState extends State<WordlePage> {
     await game.restartGame();
     if (mounted) {
       context.read<AppNotificationCubit>().show(
-        'New round started.',
+        context.l10n.t('new_round_started'),
         type: AppNotificationType.success,
       );
       setState(() {});
@@ -120,116 +122,138 @@ class _WordlePageState extends State<WordlePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final settings = context.watch<AppSettingsCubit>().state;
     final scheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        leading: const SizedBox.shrink(),
-        leadingWidth: 0,
-        title: const Text('Wordle Game'),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
-            icon: const Icon(Icons.tune_rounded),
-          ),
-        ],
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              scheme.primary.withValues(alpha: 0.06),
-              scheme.surface,
-              scheme.secondary.withValues(alpha: 0.04),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+    return BlocListener<AppSettingsCubit, AppSettingsState>(
+      listenWhen: (previous, current) =>
+          previous.gameDifficulty != current.gameDifficulty ||
+          previous.gameCooldownHours != current.gameCooldownHours ||
+          previous.requireManualGameRestart != current.requireManualGameRestart,
+      listener: (context, state) async {
+        game.difficulty = state.gameDifficulty;
+        game.cooldownHours = state.gameCooldownHours;
+        await game.restartGame();
+        if (!mounted) {
+          return;
+        }
+        context.read<AppNotificationCubit>().show(
+          l10n.t('game_settings_applied'),
+          type: AppNotificationType.success,
+        );
+        setState(() {});
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          leading: const SizedBox.shrink(),
+          leadingWidth: 0,
+          title: Text(l10n.t('wordle_game')),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/settings');
+                if (!mounted) {
+                  return;
+                }
+                await _initializeGame();
+              },
+              icon: const Icon(Icons.tune_rounded),
+            ),
+          ],
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                GameStatusPanel(
-                  game: game,
-                  showHints: settings.showGameHints,
-                  competitiveMode: settings.competitiveGameUi,
-                  showAttemptBadge: settings.showAttemptBadge,
-                  showCountdownBadge: settings.showCountdownBadge,
-                  onRestart: game.isReadyForManualRestart ? _restartGame : null,
-                  onStats: () {
-                    showModalBottomSheet<void>(
-                      context: context,
-                      isScrollControlled: true,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                      ),
-                      builder: (_) => SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.8,
-                        child: StatsPage(resultAttempt: game.resultAttempt),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: Center(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return AnimatedContainer(
-                          duration: Duration(
-                            milliseconds: settings.reduceMotion ? 0 : 240,
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: settings.competitiveGameUi
-                                ? scheme.surface.withValues(alpha: 0.98)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(32),
-                            border: settings.competitiveGameUi
-                                ? Border.all(color: scheme.outlineVariant)
-                                : null,
-                            boxShadow: settings.competitiveGameUi
-                                ? [
-                                    BoxShadow(
-                                      color: scheme.shadow.withValues(alpha: 0.08),
-                                      blurRadius: 28,
-                                      offset: const Offset(0, 16),
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: constraints.maxWidth,
-                              maxHeight: constraints.maxHeight,
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                scheme.primary.withValues(alpha: 0.06),
+                scheme.surface,
+                scheme.secondary.withValues(alpha: 0.04),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  GameStatusPanel(
+                    game: game,
+                    showHints: settings.showGameHints,
+                    competitiveMode: settings.competitiveGameUi,
+                    showAttemptBadge: settings.showAttemptBadge,
+                    showCountdownBadge: settings.showCountdownBadge,
+                    onRestart: game.isReadyForManualRestart ? _restartGame : null,
+                    onStats: () {
+                      AppNavigation.showSheet<void>(
+                        context,
+                        builder: (_) => SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.8,
+                          child: StatsPage(resultAttempt: game.resultAttempt),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: Center(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return AnimatedContainer(
+                            duration: Duration(
+                              milliseconds: settings.reduceMotion ? 0 : 240,
                             ),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: WordleGrid(
-                                guesses: game.guesses
-                                    .map((guess) => guess.split(''))
-                                    .toList(),
-                                results: game.results,
-                                highContrast: settings.highContrastGame,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: settings.competitiveGameUi
+                                  ? scheme.surface.withValues(alpha: 0.98)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(32),
+                              border: settings.competitiveGameUi
+                                  ? Border.all(color: scheme.outlineVariant)
+                                  : null,
+                              boxShadow: settings.competitiveGameUi
+                                  ? [
+                                      BoxShadow(
+                                        color: scheme.shadow.withValues(alpha: 0.08),
+                                        blurRadius: 28,
+                                        offset: const Offset(0, 16),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: constraints.maxWidth,
+                                maxHeight: constraints.maxHeight,
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: WordleGrid(
+                                  guesses: game.guesses
+                                      .map((guess) => guess.split(''))
+                                      .toList(),
+                                  results: game.results,
+                                  highContrast: settings.highContrastGame,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                KeyboardWidget(
-                  keyStatus: game.keyStatus,
-                  onKeyTap: _onKeyTap,
-                  highContrast: settings.highContrastGame,
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  KeyboardWidget(
+                    keyStatus: game.keyStatus,
+                    onKeyTap: _onKeyTap,
+                    highContrast: settings.highContrastGame,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

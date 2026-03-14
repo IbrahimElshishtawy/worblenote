@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/presentation/widgets/note_list.dart';
 import 'package:writdle/presentation/widgets/notes/notes_header.dart';
 import 'package:writdle/presentation/widgets/notes/notes_search_bar.dart';

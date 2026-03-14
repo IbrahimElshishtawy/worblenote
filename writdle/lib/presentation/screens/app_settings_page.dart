@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 import 'package:writdle/presentation/widgets/settings/appearance_settings_panel.dart';
 import 'package:writdle/presentation/widgets/settings/settings_about_panel.dart';
@@ -10,8 +11,9 @@ class AppSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.t('settings'))),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: const [
@@ -31,6 +33,18 @@ class _InlineGameSettingsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    String difficultyLabel(GameDifficulty difficulty) {
+      if (l10n.locale.languageCode == 'ar') {
+        return switch (difficulty) {
+          GameDifficulty.easy => 'سهل',
+          GameDifficulty.normal => 'عادي',
+          GameDifficulty.hard => 'صعب',
+        };
+      }
+
+      return difficulty.label;
+    }
     final settings = context.watch<AppSettingsCubit>().state;
     final reminderTime = TimeOfDay(
       hour: settings.gameReminderHour,
@@ -41,19 +55,21 @@ class _InlineGameSettingsPanel extends StatelessWidget {
     ).formatTimeOfDay(reminderTime);
 
     return SettingsSectionCard(
-      title: 'Wordle Setup',
+      title: l10n.t('wordle_setup'),
       children: [
         DropdownButtonFormField<GameDifficulty>(
           initialValue: settings.gameDifficulty,
-          decoration: const InputDecoration(
-            labelText: 'Difficulty level',
+          decoration: InputDecoration(
+            labelText: l10n.t('difficulty_level'),
             prefixIcon: Icon(Icons.speed_rounded),
           ),
           items: GameDifficulty.values
               .map(
                 (difficulty) => DropdownMenuItem(
                   value: difficulty,
-                  child: Text('${difficulty.label} - ${difficulty.attempts} tries'),
+                  child: Text(
+                    '${difficultyLabel(difficulty)} - ${difficulty.attempts}',
+                  ),
                 ),
               )
               .toList(),
@@ -66,14 +82,14 @@ class _InlineGameSettingsPanel extends StatelessWidget {
         const SizedBox(height: 14),
         DropdownButtonFormField<int>(
           initialValue: settings.gameCooldownHours,
-          decoration: const InputDecoration(
-            labelText: 'Next round time',
+          decoration: InputDecoration(
+            labelText: l10n.t('next_round_time'),
             prefixIcon: Icon(Icons.schedule_rounded),
           ),
-          items: const [
-            DropdownMenuItem(value: 6, child: Text('Every 6 hours')),
-            DropdownMenuItem(value: 12, child: Text('Every 12 hours')),
-            DropdownMenuItem(value: 24, child: Text('Every 24 hours')),
+          items: [
+            DropdownMenuItem(value: 6, child: Text(l10n.t('every_6_hours'))),
+            DropdownMenuItem(value: 12, child: Text(l10n.t('every_12_hours'))),
+            DropdownMenuItem(value: 24, child: Text(l10n.t('every_24_hours'))),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -88,14 +104,14 @@ class _InlineGameSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setGameReminderEnabled(value);
           },
-          title: const Text('Daily game reminder'),
-          subtitle: const Text('Show a local reminder outside the app every day.'),
+          title: Text(l10n.t('daily_game_reminder')),
+          subtitle: Text(l10n.t('daily_game_reminder_subtitle')),
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
           enabled: settings.gameReminderEnabled,
           leading: const Icon(Icons.alarm_rounded),
-          title: const Text('Reminder time'),
+          title: Text(l10n.t('reminder_time')),
           subtitle: Text(formattedReminderTime),
           trailing: const Icon(Icons.chevron_right_rounded),
           onTap: !settings.gameReminderEnabled
@@ -116,7 +132,7 @@ class _InlineGameSettingsPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Difficulty controls the number of attempts. Next round time controls when the game becomes available again after finishing. Daily reminder shows a local notification at your chosen time.',
+          l10n.t('wordle_setup_help'),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.4,
@@ -129,8 +145,8 @@ class _InlineGameSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setCompetitiveGameUi(value);
           },
-          title: const Text('Competitive layout'),
-          subtitle: const Text('Use a sharper, match-style game presentation.'),
+          title: Text(l10n.t('competitive_layout')),
+          subtitle: Text(l10n.t('competitive_layout_subtitle')),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
@@ -138,8 +154,8 @@ class _InlineGameSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setHighContrastGame(value);
           },
-          title: const Text('High contrast colors'),
-          subtitle: const Text('Improve tile and keyboard visibility.'),
+          title: Text(l10n.t('high_contrast_colors')),
+          subtitle: Text(l10n.t('high_contrast_colors_subtitle')),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
@@ -147,8 +163,8 @@ class _InlineGameSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setRequireManualGameRestart(value);
           },
-          title: const Text('Manual restart only'),
-          subtitle: const Text('Keep finished rounds until you restart yourself.'),
+          title: Text(l10n.t('manual_restart_only')),
+          subtitle: Text(l10n.t('manual_restart_only_subtitle')),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
@@ -156,8 +172,8 @@ class _InlineGameSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setShowGameHints(value);
           },
-          title: const Text('Show gameplay hints'),
-          subtitle: const Text('Display helper text around results and states.'),
+          title: Text(l10n.t('show_gameplay_hints')),
+          subtitle: Text(l10n.t('show_gameplay_hints_subtitle')),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
@@ -165,8 +181,8 @@ class _InlineGameSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setShowAttemptBadge(value);
           },
-          title: const Text('Show attempt badge'),
-          subtitle: const Text('Display the live attempt counter on the game HUD.'),
+          title: Text(l10n.t('show_attempt_badge')),
+          subtitle: Text(l10n.t('show_attempt_badge_subtitle')),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
@@ -174,8 +190,8 @@ class _InlineGameSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setShowCountdownBadge(value);
           },
-          title: const Text('Show countdown badge'),
-          subtitle: const Text('Display cooldown timer on the game HUD after finishing.'),
+          title: Text(l10n.t('show_countdown_badge')),
+          subtitle: Text(l10n.t('show_countdown_badge_subtitle')),
         ),
       ],
     );

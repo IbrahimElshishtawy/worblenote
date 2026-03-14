@@ -1,8 +1,30 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:writdle/core/notifications/local_notification_service.dart';
 
 enum GameDifficulty { easy, normal, hard }
+
+enum AppLanguage { english, arabic }
+
+extension AppLanguageX on AppLanguage {
+  String get storageValue {
+    switch (this) {
+      case AppLanguage.english:
+        return 'en';
+      case AppLanguage.arabic:
+        return 'ar';
+    }
+  }
+
+  static AppLanguage fromStorage(String? value) {
+    switch (value) {
+      case 'ar':
+        return AppLanguage.arabic;
+      default:
+        return AppLanguage.english;
+    }
+  }
+}
 
 extension GameDifficultyX on GameDifficulty {
   String get storageValue {
@@ -52,6 +74,7 @@ extension GameDifficultyX on GameDifficulty {
 
 class AppSettingsState {
   const AppSettingsState({
+    this.language = AppLanguage.english,
     this.textScale = 1.0,
     this.highContrastGame = false,
     this.reduceMotion = false,
@@ -67,6 +90,7 @@ class AppSettingsState {
     this.gameReminderMinute = 0,
   });
 
+  final AppLanguage language;
   final double textScale;
   final bool highContrastGame;
   final bool reduceMotion;
@@ -82,6 +106,7 @@ class AppSettingsState {
   final int gameReminderMinute;
 
   AppSettingsState copyWith({
+    AppLanguage? language,
     double? textScale,
     bool? highContrastGame,
     bool? reduceMotion,
@@ -97,6 +122,7 @@ class AppSettingsState {
     int? gameReminderMinute,
   }) {
     return AppSettingsState(
+      language: language ?? this.language,
       textScale: textScale ?? this.textScale,
       highContrastGame: highContrastGame ?? this.highContrastGame,
       reduceMotion: reduceMotion ?? this.reduceMotion,
@@ -120,6 +146,7 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
     load();
   }
 
+  static const _languageKey = 'app_language';
   static const _textScaleKey = 'app_text_scale';
   static const _highContrastGameKey = 'app_high_contrast_game';
   static const _reduceMotionKey = 'app_reduce_motion';
@@ -137,6 +164,9 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
   Future<void> load() async {
     final preferences = await SharedPreferences.getInstance();
     final nextState = AppSettingsState(
+      language: AppLanguageX.fromStorage(
+        preferences.getString(_languageKey),
+      ),
       textScale: preferences.getDouble(_textScaleKey) ?? 1.0,
       highContrastGame: preferences.getBool(_highContrastGameKey) ?? false,
       reduceMotion: preferences.getBool(_reduceMotionKey) ?? false,
@@ -157,6 +187,12 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
 
     emit(nextState);
     await _syncGameReminder(nextState);
+  }
+
+  Future<void> setLanguage(AppLanguage value) async {
+    emit(state.copyWith(language: value));
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(_languageKey, value.storageValue);
   }
 
   Future<void> setTextScale(double value) async {

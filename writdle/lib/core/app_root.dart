@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/app_routes.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/core/theme/app_theme.dart';
@@ -61,13 +63,25 @@ class WritdleApp extends StatelessWidget {
             builder: (context, themeMode) {
               return BlocBuilder<AppSettingsCubit, AppSettingsState>(
                 builder: (context, settings) {
+                  final locale = settings.language == AppLanguage.arabic
+                      ? const Locale('ar')
+                      : const Locale('en');
+
                   return MaterialApp(
-                    title: 'Writdle App',
+                    title: AppLocalizations(locale).t('app_title'),
                     debugShowCheckedModeBanner: false,
                     scaffoldMessengerKey: scaffoldMessengerKey,
                     theme: AppTheme.light(),
                     darkTheme: AppTheme.dark(),
                     themeMode: themeMode,
+                    locale: locale,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates: const [
+                      AppLocalizations.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
                     themeAnimationCurve: Curves.easeInOutCubic,
                     themeAnimationDuration: settings.reduceMotion
                         ? Duration.zero

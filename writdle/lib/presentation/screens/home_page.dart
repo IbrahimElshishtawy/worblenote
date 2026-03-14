@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 import 'package:writdle/presentation/bloc/profile_cubit.dart';
 import 'package:writdle/presentation/screens/activity_page.dart';
@@ -11,44 +12,41 @@ import 'package:writdle/presentation/widgets/home/home_bottom_nav.dart';
 import 'package:writdle/presentation/widgets/home/home_tab_item.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({
+    super.key,
+    this.initialIndex = 0,
+  });
+
+  final int initialIndex;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
-  int _previousIndex = 0;
+  late int _currentIndex;
+  late int _previousIndex;
 
-  final List<HomeTabItem> _tabs = const [
-    HomeTabItem(
-      icon: Icons.dashboard_rounded,
-      label: 'Home',
-    ),
-    HomeTabItem(
-      icon: Icons.auto_awesome,
-      label: 'Wordle',
-    ),
-    HomeTabItem(
-      icon: Icons.edit_note_rounded,
-      label: 'Notes',
-    ),
-    HomeTabItem(
-      icon: Icons.insights_rounded,
-      label: 'Activity',
-    ),
-    HomeTabItem(
-      icon: Icons.person_outline,
-      label: 'Profile',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _previousIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final reduceMotion = context.select<AppSettingsCubit, bool>(
       (cubit) => cubit.state.reduceMotion,
     );
+    final tabs = [
+      HomeTabItem(icon: Icons.dashboard_rounded, label: l10n.t('home')),
+      HomeTabItem(icon: Icons.auto_awesome, label: l10n.t('wordle')),
+      HomeTabItem(icon: Icons.edit_note_rounded, label: l10n.t('notes')),
+      HomeTabItem(icon: Icons.insights_rounded, label: l10n.t('activity')),
+      HomeTabItem(icon: Icons.person_outline, label: l10n.t('profile')),
+    ];
 
     final pages = [
       HomeDashboardPage(
@@ -98,7 +96,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: HomeBottomNav(
-        tabs: _tabs,
+        tabs: tabs,
         currentIndex: _currentIndex,
         onTap: _changeTab,
       ),

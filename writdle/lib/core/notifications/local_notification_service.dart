@@ -1,4 +1,4 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+﻿import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -7,6 +7,9 @@ class LocalNotificationService {
 
   static final LocalNotificationService instance = LocalNotificationService._();
   static const int gameReminderNotificationId = 7001;
+  static const String _generalChannelId = 'writdle_general';
+  static const String _taskChannelId = 'writdle_tasks';
+  static const String _gameChannelId = 'writdle_game';
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
@@ -29,6 +32,31 @@ class LocalNotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >();
 
+    await androidImplementation?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _generalChannelId,
+        'Writdle Alerts',
+        description: 'General in-app alerts and confirmations',
+        importance: Importance.defaultImportance,
+      ),
+    );
+    await androidImplementation?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _taskChannelId,
+        'Task Reminders',
+        description: 'Local reminders for saved tasks',
+        importance: Importance.max,
+      ),
+    );
+    await androidImplementation?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _gameChannelId,
+        'Game Reminders',
+        description: 'Local reminders for Wordle sessions',
+        importance: Importance.high,
+      ),
+    );
+
     await androidImplementation?.requestNotificationsPermission();
     final canScheduleExact =
         await androidImplementation?.canScheduleExactNotifications() ?? false;
@@ -48,13 +76,39 @@ class LocalNotificationService {
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
-  NotificationDetails get _details => const NotificationDetails(
+  NotificationDetails get _generalDetails => const NotificationDetails(
         android: AndroidNotificationDetails(
-          'writdle_general',
-          'Writdle Notifications',
+          _generalChannelId,
+          'Writdle Alerts',
           channelDescription: 'General app notifications',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+        iOS: DarwinNotificationDetails(),
+        macOS: DarwinNotificationDetails(),
+      );
+
+  NotificationDetails get _taskDetails => const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _taskChannelId,
+          'Task Reminders',
+          channelDescription: 'Local reminders for saved tasks',
           importance: Importance.max,
           priority: Priority.high,
+          category: AndroidNotificationCategory.reminder,
+        ),
+        iOS: DarwinNotificationDetails(),
+        macOS: DarwinNotificationDetails(),
+      );
+
+  NotificationDetails get _gameDetails => const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _gameChannelId,
+          'Game Reminders',
+          channelDescription: 'Local reminders for Wordle sessions',
+          importance: Importance.high,
+          priority: Priority.high,
+          category: AndroidNotificationCategory.reminder,
         ),
         iOS: DarwinNotificationDetails(),
         macOS: DarwinNotificationDetails(),
@@ -65,7 +119,7 @@ class LocalNotificationService {
     required String title,
     required String body,
   }) async {
-    await _plugin.show(id, title, body, _details);
+    await _plugin.show(id, title, body, _generalDetails);
   }
 
   Future<AndroidScheduleMode> _scheduleMode() async {
@@ -80,10 +134,9 @@ class LocalNotificationService {
         : AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
-  Future<void> schedule({
+  Future<void> scheduleTaskReminder({
     required int id,
-    required String title,
-    required String body,
+    required String taskTitle,
     required DateTime scheduledAt,
   }) async {
     if (scheduledAt.isBefore(DateTime.now())) {
@@ -92,10 +145,10 @@ class LocalNotificationService {
 
     await _plugin.zonedSchedule(
       id,
-      title,
-      body,
+      'Task Reminder',
+      taskTitle,
       tz.TZDateTime.from(scheduledAt, tz.local),
-      _details,
+      _taskDetails,
       androidScheduleMode: await _scheduleMode(),
       payload: 'task_reminder',
     );
@@ -124,7 +177,7 @@ class LocalNotificationService {
       'Wordle Reminder',
       'Your next game session is waiting. Open Writdle and play now.',
       scheduledAt,
-      _details,
+      _gameDetails,
       androidScheduleMode: await _scheduleMode(),
       matchDateTimeComponents: DateTimeComponents.time,
       payload: 'game_reminder',
@@ -133,5 +186,13 @@ class LocalNotificationService {
 
   Future<void> cancel(int id) async {
     await _plugin.cancel(id);
+  }
+
+  Future<void> cancelAll() async {
+    await _plugin.cancelAll();
+  }
+
+  Future<List<PendingNotificationRequest>> pendingRequests() async {
+    return _plugin.pendingNotificationRequests();
   }
 }

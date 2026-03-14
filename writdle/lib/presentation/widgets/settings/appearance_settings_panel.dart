@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 import 'package:writdle/presentation/bloc/theme_cubit.dart';
 import 'package:writdle/presentation/widgets/settings/settings_section_card.dart';
@@ -9,22 +10,55 @@ class AppearanceSettingsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final settings = context.watch<AppSettingsCubit>().state;
     final themeMode = context.watch<ThemeCubit>().state;
 
     return SettingsSectionCard(
-      title: 'Appearance',
+      title: l10n.t('appearance'),
       children: [
         ListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Theme mode'),
-          subtitle: const Text('Choose how the whole app looks.'),
+          title: Text(l10n.t('language')),
+          subtitle: Text(l10n.t('theme_mode_subtitle')),
+          trailing: DropdownButton<AppLanguage>(
+            value: settings.language,
+            items: [
+              DropdownMenuItem(
+                value: AppLanguage.english,
+                child: Text(l10n.t('english')),
+              ),
+              DropdownMenuItem(
+                value: AppLanguage.arabic,
+                child: Text(l10n.t('arabic')),
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                context.read<AppSettingsCubit>().setLanguage(value);
+              }
+            },
+          ),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.t('theme_mode')),
+          subtitle: Text(l10n.t('theme_mode_subtitle')),
           trailing: DropdownButton<ThemeMode>(
             value: themeMode,
-            items: const [
-              DropdownMenuItem(value: ThemeMode.system, child: Text('System')),
-              DropdownMenuItem(value: ThemeMode.light, child: Text('Light')),
-              DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark')),
+            items: [
+              DropdownMenuItem(
+                value: ThemeMode.system,
+                child: Text(l10n.t('system')),
+              ),
+              DropdownMenuItem(
+                value: ThemeMode.light,
+                child: Text(l10n.t('light')),
+              ),
+              DropdownMenuItem(
+                value: ThemeMode.dark,
+                child: Text(l10n.t('dark')),
+              ),
             ],
             onChanged: (value) {
               if (value != null) {
@@ -35,8 +69,13 @@ class AppearanceSettingsPanel extends StatelessWidget {
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Text size'),
-          subtitle: Text('Current scale: ${settings.textScale.toStringAsFixed(2)}x'),
+          title: Text(l10n.t('text_size')),
+          subtitle: Text(
+            l10n.t(
+              'current_scale',
+              {'value': settings.textScale.toStringAsFixed(2)},
+            ),
+          ),
         ),
         Slider(
           value: settings.textScale,
@@ -54,8 +93,8 @@ class AppearanceSettingsPanel extends StatelessWidget {
           onChanged: (value) {
             context.read<AppSettingsCubit>().setReduceMotion(value);
           },
-          title: const Text('Reduce motion'),
-          subtitle: const Text('Use calmer transitions and animations.'),
+          title: Text(l10n.t('reduce_motion')),
+          subtitle: Text(l10n.t('reduce_motion_subtitle')),
         ),
       ],
     );

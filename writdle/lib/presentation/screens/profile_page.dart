@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_navigation.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/notifications/app_notification.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/domain/entities/profile_data.dart';
@@ -31,11 +33,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         leading: const SizedBox.shrink(),
         leadingWidth: 0,
-        title: const Text('My Profile'),
+        title: Text(l10n.t('my_profile')),
         actions: [
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/settings'),
@@ -47,7 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
         listenWhen: (previous, current) => previous.isSaving && !current.isSaving,
         listener: (context, state) {
           context.read<AppNotificationCubit>().show(
-                'Profile updated successfully.',
+                l10n.t('profile_updated'),
                 type: AppNotificationType.success,
               );
         },
@@ -125,9 +128,8 @@ class _ProfilePageState extends State<ProfilePage> {
     BuildContext context,
     ProfileData profile,
   ) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
+    await AppNavigation.showSheet<void>(
+      context,
       backgroundColor: Colors.transparent,
       showDragHandle: false,
       builder: (_) => ProfileEditSheet(profile: profile),

@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:writdle/core/notifications/local_notification_service.dart';
 import 'package:writdle/domain/entities/task_load_result.dart';
 import 'package:writdle/domain/entities/task_model.dart';
@@ -42,7 +42,9 @@ class TasksState {
 
 class TasksCubit extends Cubit<TasksState> {
   TasksCubit(this._repository, this._profileRepository)
-      : super(const TasksState());
+      : super(const TasksState()) {
+    syncAllTaskReminders();
+  }
 
   final ITaskRepository _repository;
   final IProfileRepository _profileRepository;
@@ -139,12 +141,18 @@ class TasksCubit extends Cubit<TasksState> {
       return;
     }
 
-    await LocalNotificationService.instance.schedule(
+    await LocalNotificationService.instance.scheduleTaskReminder(
       id: task.notificationId!,
-      title: 'Task Reminder',
-      body: task.title,
+      taskTitle: task.title,
       scheduledAt: task.reminderAt!,
     );
+  }
+
+  Future<void> syncAllTaskReminders() async {
+    final tasks = await _repository.getAllTasks();
+    for (final task in tasks) {
+      await _syncTaskReminder(task);
+    }
   }
 
   Future<void> _syncCompletedStats(List<TaskModel> tasks) async {

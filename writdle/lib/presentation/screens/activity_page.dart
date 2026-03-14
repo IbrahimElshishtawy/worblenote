@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:writdle/core/app_navigation.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/utils/date_formatter.dart';
 import 'package:writdle/presentation/bloc/profile_cubit.dart';
 import 'package:writdle/presentation/bloc/tasks_cubit.dart';
@@ -32,11 +34,12 @@ class _ActivityPageState extends State<ActivityPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         leading: const SizedBox.shrink(),
         leadingWidth: 0,
-        title: const Text('Your Daily Activity'),
+        title: Text(l10n.t('your_daily_activity')),
       ),
       body: BlocBuilder<TasksCubit, TasksState>(
         builder: (context, state) {
@@ -87,12 +90,18 @@ class _ActivityPageState extends State<ActivityPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Daily Progress: $completedTasks / $totalTasks',
+                          l10n.t(
+                            'daily_progress',
+                            {
+                              'completed': '$completedTasks',
+                              'total': '$totalTasks',
+                            },
+                          ),
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'All activity data and task changes are saved locally on this phone.',
+                          l10n.t('activity_saved_locally'),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
@@ -113,8 +122,8 @@ class _ActivityPageState extends State<ActivityPage> {
                       onPressed: () async {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => TasksPage(selectedDay: _selectedDay),
+                          AppNavigation.page(
+                            TasksPage(selectedDay: _selectedDay),
                           ),
                         );
                         if (!mounted) {
@@ -129,26 +138,26 @@ class _ActivityPageState extends State<ActivityPage> {
                         minimumSize: const Size(0, 48),
                       ),
                       icon: const Icon(Icons.add_task),
-                      label: const Text('Manage Tasks'),
+                      label: Text(l10n.t('manage_tasks')),
                     ),
-                    Text('Remaining: ${totalTasks - completedTasks}'),
+                    Text('${l10n.t('remaining')}: ${totalTasks - completedTasks}'),
                   ],
                 ),
                 const SizedBox(height: 24),
                 if (state.isLoading)
                   const Center(child: CircularProgressIndicator())
                 else if (uncompletedTasks.isEmpty && totalTasks == 0)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text('No tasks for this day. Add some!'),
+                      padding: const EdgeInsets.all(24),
+                      child: Text(l10n.t('no_tasks_for_day')),
                     ),
                   )
                 else if (uncompletedTasks.isEmpty)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text('All caught up for today!'),
+                      padding: const EdgeInsets.all(24),
+                      child: Text(l10n.t('all_caught_up')),
                     ),
                   )
                 else

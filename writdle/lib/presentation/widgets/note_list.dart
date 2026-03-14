@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_navigation.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/notifications/app_notification.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/presentation/bloc/notes_cubit.dart';
@@ -55,13 +57,8 @@ class _NoteListState extends State<NoteList> {
     _descController.text = currentDesc ?? '';
     _selectedColor = currentColor ?? 0xFFFFF8E1;
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    await AppNavigation.showSheet<void>(
+      context,
       builder: (_) => StatefulBuilder(
         builder: (context, setModalState) {
           return NoteEditorSheet(
@@ -77,7 +74,7 @@ class _NoteListState extends State<NoteList> {
               final description = _descController.text.trim();
               if (title.isEmpty) {
                 context.read<AppNotificationCubit>().show(
-                  'Please enter a note title.',
+                  context.l10n.t('note_title_required'),
                   type: AppNotificationType.error,
                 );
                 return;
@@ -91,7 +88,7 @@ class _NoteListState extends State<NoteList> {
                   return;
                 }
                 context.read<AppNotificationCubit>().show(
-                  'Note saved successfully.',
+                  context.l10n.t('note_saved'),
                   type: AppNotificationType.success,
                 );
               } else {
@@ -106,7 +103,7 @@ class _NoteListState extends State<NoteList> {
                   return;
                 }
                 context.read<AppNotificationCubit>().show(
-                  'Note updated successfully.',
+                  context.l10n.t('note_updated'),
                   type: AppNotificationType.success,
                 );
               }
@@ -157,7 +154,7 @@ class _NoteListState extends State<NoteList> {
                                       return;
                                     }
                                     context.read<AppNotificationCubit>().show(
-                                      'Note deleted.',
+                                      context.l10n.t('note_deleted'),
                                       type: AppNotificationType.info,
                                     );
                                   },
@@ -173,7 +170,7 @@ class _NoteListState extends State<NoteList> {
               child: FloatingActionButton.extended(
                 onPressed: () => _openEditor(),
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('New Note'),
+                label: Text(context.l10n.t('new_note')),
               ),
             ),
           ],

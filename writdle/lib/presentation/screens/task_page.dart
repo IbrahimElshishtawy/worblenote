@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:writdle/core/app_navigation.dart';
+import 'package:writdle/core/app_localizations.dart';
 import 'package:writdle/core/notifications/app_notification.dart';
 import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/core/utils/date_formatter.dart';
@@ -83,13 +85,8 @@ class _TasksPageState extends State<TasksPage> {
     _selectedPriority = task?.priority ?? TaskPriority.medium;
     _selectedReminder = task?.reminderAt;
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    await AppNavigation.showSheet<void>(
+      context,
       builder: (_) => StatefulBuilder(
         builder: (context, setModalState) {
           return TaskEditorSheet(
@@ -118,14 +115,14 @@ class _TasksPageState extends State<TasksPage> {
               final title = _titleController.text.trim();
               if (title.isEmpty) {
                 context.read<AppNotificationCubit>().show(
-                  'Task title is required.',
+                  context.l10n.t('task_title_required'),
                   type: AppNotificationType.error,
                 );
                 return;
               }
               if (_selectedReminder != null && _selectedReminder!.isBefore(DateTime.now())) {
                 context.read<AppNotificationCubit>().show(
-                  'Reminder time must be in the future.',
+                  context.l10n.t('reminder_future'),
                   type: AppNotificationType.error,
                 );
                 return;
@@ -148,8 +145,10 @@ class _TasksPageState extends State<TasksPage> {
               }
               context.read<AppNotificationCubit>().show(
                     _selectedReminder != null
-                        ? 'Task saved and reminder scheduled.'
-                        : (task == null ? 'Task added.' : 'Task updated.'),
+                        ? context.l10n.t('task_saved_reminder')
+                        : (task == null
+                            ? context.l10n.t('task_added')
+                            : context.l10n.t('task_updated')),
                     type: AppNotificationType.success,
                     localTitle: 'Task Update',
                     showLocalNotification: task == null,
@@ -164,16 +163,17 @@ class _TasksPageState extends State<TasksPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Manage Tasks'),
+        title: Text(l10n.t('manage_tasks_title')),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          tooltip: 'Back to activity',
+          tooltip: l10n.t('back_to_activity'),
         ),
       ),
       body: Container(
