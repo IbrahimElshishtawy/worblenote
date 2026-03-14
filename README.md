@@ -12,7 +12,7 @@ Notes · Tasks · Wordle Game · Bilingual · Local Notifications · Profile Per
 
 <br/>
 
-[![Download APK](https://img.shields.io/badge/Download-APK-brightgreen?style=for-the-badge&logo=android)](https://github.com/YOUR_USERNAME/writdle-v2/releases/latest)
+[![Download APK](https://github.com/IbrahimElshishtawy/worblenote/releases/download/writdle/writdle.apk)
 &nbsp;&nbsp;
 [![View Releases](https://img.shields.io/badge/View-Releases-blue?style=for-the-badge&logo=github)](https://github.com/YOUR_USERNAME/writdle-v2/releases)
 
