@@ -17,6 +17,7 @@ class HomeNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Expanded(
       child: InkWell(
@@ -25,7 +26,10 @@ class HomeNavItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 260),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
+          padding: EdgeInsets.symmetric(
+            horizontal: isArabic ? 7 : 9,
+            vertical: isArabic ? 9 : 10,
+          ),
           decoration: BoxDecoration(
             color: isSelected
                 ? scheme.primary.withValues(alpha: 0.14)
@@ -47,6 +51,7 @@ class HomeNavItem extends StatelessWidget {
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 220),
                 style: theme.textTheme.labelSmall!.copyWith(
+                  fontSize: isArabic ? 10 : 11,
                   fontWeight: FontWeight.w700,
                   color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
                 ),

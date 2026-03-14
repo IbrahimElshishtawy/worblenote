@@ -5,10 +5,7 @@ class AppLocalizations {
 
   final Locale locale;
 
-  static const supportedLocales = [
-    Locale('en'),
-    Locale('ar'),
-  ];
+  static const supportedLocales = [Locale('en'), Locale('ar')];
 
   static AppLocalizations of(BuildContext context) {
     final localizations = Localizations.of<AppLocalizations>(
@@ -45,21 +42,28 @@ class AppLocalizations {
       'every_12_hours': 'Every 12 hours',
       'every_24_hours': 'Every 24 hours',
       'daily_game_reminder': 'Daily game reminder',
-      'daily_game_reminder_subtitle': 'Show a local reminder outside the app every day.',
+      'daily_game_reminder_subtitle':
+          'Show a local reminder outside the app every day.',
       'reminder_time': 'Reminder time',
-      'wordle_setup_help': 'Difficulty controls the number of attempts. Next round time controls when the game becomes available again after finishing. Daily reminder shows a local notification at your chosen time.',
+      'wordle_setup_help':
+          'Difficulty controls the number of attempts. Next round time controls when the game becomes available again after finishing. Daily reminder shows a local notification at your chosen time.',
       'competitive_layout': 'Competitive layout',
-      'competitive_layout_subtitle': 'Use a sharper, match-style game presentation.',
+      'competitive_layout_subtitle':
+          'Use a sharper, match-style game presentation.',
       'high_contrast_colors': 'High contrast colors',
       'high_contrast_colors_subtitle': 'Improve tile and keyboard visibility.',
       'manual_restart_only': 'Manual restart only',
-      'manual_restart_only_subtitle': 'Keep finished rounds until you restart yourself.',
+      'manual_restart_only_subtitle':
+          'Keep finished rounds until you restart yourself.',
       'show_gameplay_hints': 'Show gameplay hints',
-      'show_gameplay_hints_subtitle': 'Display helper text around results and states.',
+      'show_gameplay_hints_subtitle':
+          'Display helper text around results and states.',
       'show_attempt_badge': 'Show attempt badge',
-      'show_attempt_badge_subtitle': 'Display the live attempt counter on the game HUD.',
+      'show_attempt_badge_subtitle':
+          'Display the live attempt counter on the game HUD.',
       'show_countdown_badge': 'Show countdown badge',
-      'show_countdown_badge_subtitle': 'Display cooldown timer on the game HUD after finishing.',
+      'show_countdown_badge_subtitle':
+          'Display cooldown timer on the game HUD after finishing.',
       'home': 'Home',
       'wordle': 'Wordle',
       'notes': 'Notes',
@@ -85,7 +89,8 @@ class AppLocalizations {
       'recent_wins_subtitle': 'Small highlights keep the rhythm going.',
       'your_daily_activity': 'Your Daily Activity',
       'daily_progress': 'Daily Progress: {completed} / {total}',
-      'activity_saved_locally': 'All activity data and task changes are saved locally on this phone.',
+      'activity_saved_locally':
+          'All activity data and task changes are saved locally on this phone.',
       'manage_tasks': 'Manage Tasks',
       'no_tasks_for_day': 'No tasks for this day. Add some!',
       'all_caught_up': 'All caught up for today!',
@@ -100,15 +105,18 @@ class AppLocalizations {
       'stats': 'Stats',
       'match_state': 'Match State',
       'performance_overview': 'Performance Overview',
-      'performance_overview_subtitle': 'Your local Wordle record, win spread, and latest round summary.',
+      'performance_overview_subtitle':
+          'Your local Wordle record, win spread, and latest round summary.',
       'games': 'Games',
       'wins': 'Wins',
       'losses': 'Losses',
       'attempt_breakdown': 'Attempt Breakdown',
-      'attempt_breakdown_subtitle': 'See how often you finish in each round window.',
+      'attempt_breakdown_subtitle':
+          'See how often you finish in each round window.',
       'back_to_game': 'Back to game',
       'reset_statistics': 'Reset statistics',
-      'reset_statistics_message': 'This will clear all saved Wordle performance data on this device.',
+      'reset_statistics_message':
+          'This will clear all saved Wordle performance data on this device.',
       'cancel': 'Cancel',
       'reset': 'Reset',
       'notes_empty': 'No notes yet',
@@ -155,26 +163,32 @@ class AppLocalizations {
       'every_12_hours': 'كل 12 ساعة',
       'every_24_hours': 'كل 24 ساعة',
       'daily_game_reminder': 'تذكير اللعبة اليومي',
-      'daily_game_reminder_subtitle': 'أظهر تذكيرًا محليًا خارج التطبيق كل يوم.',
+      'daily_game_reminder_subtitle':
+          'أظهر تذكيرًا محليًا خارج التطبيق كل يوم.',
       'reminder_time': 'وقت التذكير',
-      'wordle_setup_help': 'الصعوبة تتحكم في عدد المحاولات. وقت الجولة التالية يحدد متى تتاح اللعبة مرة أخرى بعد الانتهاء. التذكير اليومي يرسل إشعارًا محليًا في الوقت الذي تختاره.',
+      'wordle_setup_help':
+          'الصعوبة تتحكم في عدد المحاولات. وقت الجولة التالية يحدد متى تتاح اللعبة مرة أخرى بعد الانتهاء. التذكير اليومي يرسل إشعارًا محليًا في الوقت الذي تختاره.',
       'competitive_layout': 'واجهة تنافسية',
-      'competitive_layout_subtitle': 'استخدم عرضًا أكثر حدة وأقرب لأجواء المباريات.',
+      'competitive_layout_subtitle':
+          'استخدم عرضًا أكثر حدة وأقرب لأجواء المباريات.',
       'high_contrast_colors': 'ألوان عالية التباين',
       'high_contrast_colors_subtitle': 'حسّن وضوح المربعات ولوحة المفاتيح.',
       'manual_restart_only': 'إعادة تشغيل يدوية فقط',
-      'manual_restart_only_subtitle': 'احتفظ بالجولة المنتهية حتى تعيد التشغيل بنفسك.',
+      'manual_restart_only_subtitle':
+          'احتفظ بالجولة المنتهية حتى تعيد التشغيل بنفسك.',
       'show_gameplay_hints': 'إظهار تلميحات اللعب',
-      'show_gameplay_hints_subtitle': 'اعرض نصوصًا مساعدة حول النتائج والحالات.',
+      'show_gameplay_hints_subtitle':
+          'اعرض نصوصًا مساعدة حول النتائج والحالات.',
       'show_attempt_badge': 'إظهار شارة المحاولة',
-      'show_attempt_badge_subtitle': 'اعرض عداد المحاولة الحالي في واجهة اللعبة.',
+      'show_attempt_badge_subtitle':
+          'اعرض عداد المحاولة الحالي في واجهة اللعبة.',
       'show_countdown_badge': 'إظهار شارة العد التنازلي',
       'show_countdown_badge_subtitle': 'اعرض مؤقت التهدئة بعد انتهاء الجولة.',
       'home': 'الرئيسية',
       'wordle': 'ووردل',
       'notes': 'الملاحظات',
       'activity': 'النشاط',
-      'profile': 'الملف الشخصي',
+      'profile': 'الملف ',
       'quick_focus': 'وصول سريع',
       'quick_focus_subtitle': 'تحرك بسرعة بين أقسامك الأساسية.',
       'play_wordle': 'العب ووردل',
@@ -195,7 +209,8 @@ class AppLocalizations {
       'recent_wins_subtitle': 'النجاحات الصغيرة تحافظ على الإيقاع.',
       'your_daily_activity': 'نشاطك اليومي',
       'daily_progress': 'تقدم اليوم: {completed} / {total}',
-      'activity_saved_locally': 'جميع بيانات النشاط وتغييرات المهام محفوظة محليًا على هذا الهاتف.',
+      'activity_saved_locally':
+          'جميع بيانات النشاط وتغييرات المهام محفوظة محليًا على هذا الهاتف.',
       'manage_tasks': 'إدارة المهام',
       'no_tasks_for_day': 'لا توجد مهام لهذا اليوم. أضف بعضًا منها!',
       'all_caught_up': 'تم إنجاز كل شيء لهذا اليوم!',
@@ -210,15 +225,18 @@ class AppLocalizations {
       'stats': 'الإحصائيات',
       'match_state': 'حالة المباراة',
       'performance_overview': 'ملخص الأداء',
-      'performance_overview_subtitle': 'سجلك المحلي في ووردل وتوزيع الفوز وملخص آخر جولة.',
+      'performance_overview_subtitle':
+          'سجلك المحلي في ووردل وتوزيع الفوز وملخص آخر جولة.',
       'games': 'الألعاب',
       'wins': 'الانتصارات',
       'losses': 'الخسائر',
       'attempt_breakdown': 'توزيع المحاولات',
-      'attempt_breakdown_subtitle': 'شاهد عدد مرات إنهاء الجولة في كل نافذة محاولة.',
+      'attempt_breakdown_subtitle':
+          'شاهد عدد مرات إنهاء الجولة في كل نافذة محاولة.',
       'back_to_game': 'العودة إلى اللعبة',
       'reset_statistics': 'إعادة ضبط الإحصائيات',
-      'reset_statistics_message': 'سيؤدي هذا إلى مسح جميع بيانات أداء ووردل المحفوظة على هذا الجهاز.',
+      'reset_statistics_message':
+          'سيؤدي هذا إلى مسح جميع بيانات أداء ووردل المحفوظة على هذا الجهاز.',
       'cancel': 'إلغاء',
       'reset': 'إعادة ضبط',
       'notes_empty': 'لا توجد ملاحظات بعد',
@@ -256,14 +274,14 @@ class AppLocalizations {
   }
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) =>
-      AppLocalizations.supportedLocales.any(
-        (supported) => supported.languageCode == locale.languageCode,
-      );
+  bool isSupported(Locale locale) => AppLocalizations.supportedLocales.any(
+    (supported) => supported.languageCode == locale.languageCode,
+  );
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
@@ -271,11 +289,10 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) => false;
+  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) =>
+      false;
 }
 
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
-
-

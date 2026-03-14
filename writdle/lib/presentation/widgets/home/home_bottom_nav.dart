@@ -22,10 +22,10 @@ class HomeBottomNav extends StatelessWidget {
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
         decoration: BoxDecoration(
           color: scheme.surface.withValues(alpha: 0.94),
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(26),
           border: Border.all(color: scheme.outlineVariant),
           boxShadow: [
             BoxShadow(
