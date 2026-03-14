@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:writdle/presentation/screens/Splash_Screen_page.dart';
 import 'package:writdle/presentation/screens/activity_page.dart';
+import 'package:writdle/presentation/screens/app_settings_page.dart';
 import 'package:writdle/presentation/screens/games_page.dart';
 import 'package:writdle/presentation/screens/home_page.dart';
 import 'package:writdle/presentation/screens/login_page.dart';
 import 'package:writdle/presentation/screens/note_page.dart';
-import 'package:writdle/presentation/screens/register_page.dart';
-import 'package:writdle/presentation/screens/settings_page.dart';
 import 'package:writdle/presentation/screens/task_page.dart';
 
 class AppRoutes {
@@ -22,7 +21,8 @@ class AppRoutes {
     }
 
     final name = settings.name ?? '';
-    final useScale = name == '/login' || name == '/register' || name == '/splash';
+    final useScale =
+        name == '/login' || name == '/register' || name == '/splash';
 
     return _buildRoute(
       page,
@@ -36,12 +36,13 @@ class AppRoutes {
       '/splash' => const SplashScreen(),
       '/home' => const HomePage(),
       '/login' => const LoginPage(),
-      '/register' => const RegisterPage(),
+      '/register' => const LoginPage(),
+      '/welcome-profile' => const LoginPage(),
       '/activity' => const ActivityPage(),
       '/notes' => const NotesPage(),
       '/games' => const WordlePage(),
       '/calendar' => TasksPage(selectedDay: DateTime.now()),
-      '/settings' => const SettingsPage(),
+      '/settings' => const AppSettingsPage(),
       _ => null,
     };
   }

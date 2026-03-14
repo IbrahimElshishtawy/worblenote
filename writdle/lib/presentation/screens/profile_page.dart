@@ -41,16 +41,6 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: () => Navigator.pushNamed(context, '/settings'),
             icon: const Icon(Icons.tune_rounded),
           ),
-          IconButton(
-            onPressed: () async {
-              await context.read<ProfileCubit>().logout();
-              if (!mounted) {
-                return;
-              }
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            icon: const Icon(Icons.logout),
-          ),
         ],
       ),
       body: BlocConsumer<ProfileCubit, ProfileState>(

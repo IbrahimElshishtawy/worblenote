@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
+import 'package:writdle/presentation/widgets/settings/appearance_settings_panel.dart';
+import 'package:writdle/presentation/widgets/settings/settings_about_panel.dart';
 import 'package:writdle/presentation/widgets/settings/settings_section_card.dart';
 
-class GameSettingsPanel extends StatelessWidget {
-  const GameSettingsPanel({super.key});
+class AppSettingsPage extends StatelessWidget {
+  const AppSettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: const [
+          AppearanceSettingsPanel(),
+          SizedBox(height: 18),
+          _InlineGameSettingsPanel(),
+          SizedBox(height: 18),
+          SettingsAboutPanel(),
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineGameSettingsPanel extends StatelessWidget {
+  const _InlineGameSettingsPanel();
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +53,7 @@ class GameSettingsPanel extends StatelessWidget {
               .map(
                 (difficulty) => DropdownMenuItem(
                   value: difficulty,
-                  child: Text(
-                    '${difficulty.label} - ${difficulty.attempts} tries',
-                  ),
+                  child: Text('${difficulty.label} - ${difficulty.attempts} tries'),
                 ),
               )
               .toList(),

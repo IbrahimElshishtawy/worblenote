@@ -127,4 +127,24 @@ class LocalAuthStore {
     await saveAccounts(updatedAccounts);
     await setCurrentAccount(updatedAccount);
   }
+
+  static Future<LocalAuthAccount> createOnboardingProfile({
+    required String name,
+    required String bio,
+  }) async {
+    final now = DateTime.now();
+    final accounts = await getAccounts();
+    final account = LocalAuthAccount(
+      id: 'local_profile_${now.microsecondsSinceEpoch}',
+      name: name.trim(),
+      email: 'local_profile_${now.millisecondsSinceEpoch}@device.local',
+      password: '',
+      bio: bio.trim(),
+      createdAt: now,
+    );
+    accounts.add(account);
+    await saveAccounts(accounts);
+    await setCurrentAccount(account);
+    return account;
+  }
 }

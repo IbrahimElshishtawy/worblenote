@@ -53,7 +53,7 @@ class _InlineGameSettingsPanel extends StatelessWidget {
               .map(
                 (difficulty) => DropdownMenuItem(
                   value: difficulty,
-                  child: Text('${difficulty.label} • ${difficulty.attempts} tries'),
+                  child: Text('${difficulty.label} - ${difficulty.attempts} tries'),
                 ),
               )
               .toList(),

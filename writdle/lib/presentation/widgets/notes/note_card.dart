@@ -29,7 +29,9 @@ class NoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final noteColor = Color(note.colorValue == 0 ? 0xFFFFF1B8 : note.colorValue);
+    final noteColor = Color(
+      note.colorValue == 0 ? 0xFFFFF1B8 : note.colorValue,
+    );
     final topColor = _blendWithWhite(noteColor, 0.28);
     final bottomColor = _blendWithWhite(noteColor, 0.02);
     final menuColor = _adaptiveMenuColor(bottomColor);
@@ -43,7 +45,9 @@ class NoteCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.55)),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.55),
+        ),
         boxShadow: [
           BoxShadow(
             color: scheme.shadow.withValues(alpha: 0.06),
@@ -97,11 +101,7 @@ class NoteCard extends StatelessWidget {
             const SizedBox(height: 14),
             Row(
               children: [
-                Icon(
-                  Icons.schedule_rounded,
-                  size: 16,
-                  color: scheme.primary,
-                ),
+                Icon(Icons.schedule_rounded, size: 16, color: scheme.primary),
                 const SizedBox(width: 6),
                 Text(
                   DateFormat('hh:mm a').format(note.createdAt),
@@ -112,7 +112,10 @@ class NoteCard extends StatelessWidget {
                 const Spacer(),
                 if (note.id.startsWith('local_'))
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.55),
                       borderRadius: BorderRadius.circular(999),

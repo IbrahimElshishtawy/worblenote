@@ -59,8 +59,11 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) {
       return;
     }
-    final isLoggedIn = await context.read<IAuthRepository>().isAuthenticated();
-    Navigator.pushReplacementNamed(context, isLoggedIn ? '/home' : '/login');
+    final hasProfile = await context.read<IAuthRepository>().isAuthenticated();
+    Navigator.pushReplacementNamed(
+      context,
+      hasProfile ? '/home' : '/login',
+    );
   }
 
   @override
