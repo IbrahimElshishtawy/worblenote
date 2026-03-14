@@ -173,34 +173,49 @@ class _WordlePageState extends State<WordlePage> {
                 const SizedBox(height: 24),
                 Expanded(
                   child: Center(
-                    child: AnimatedContainer(
-                      duration: Duration(
-                        milliseconds: settings.reduceMotion ? 0 : 240,
-                      ),
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: settings.competitiveGameUi
-                            ? scheme.surface.withValues(alpha: 0.98)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(32),
-                        border: settings.competitiveGameUi
-                            ? Border.all(color: scheme.outlineVariant)
-                            : null,
-                        boxShadow: settings.competitiveGameUi
-                            ? [
-                                BoxShadow(
-                                  color: scheme.shadow.withValues(alpha: 0.08),
-                                  blurRadius: 28,
-                                  offset: const Offset(0, 16),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: WordleGrid(
-                        guesses: game.guesses.map((guess) => guess.split('')).toList(),
-                        results: game.results,
-                        highContrast: settings.highContrastGame,
-                      ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return AnimatedContainer(
+                          duration: Duration(
+                            milliseconds: settings.reduceMotion ? 0 : 240,
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: settings.competitiveGameUi
+                                ? scheme.surface.withValues(alpha: 0.98)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(32),
+                            border: settings.competitiveGameUi
+                                ? Border.all(color: scheme.outlineVariant)
+                                : null,
+                            boxShadow: settings.competitiveGameUi
+                                ? [
+                                    BoxShadow(
+                                      color: scheme.shadow.withValues(alpha: 0.08),
+                                      blurRadius: 28,
+                                      offset: const Offset(0, 16),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: constraints.maxWidth,
+                              maxHeight: constraints.maxHeight,
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: WordleGrid(
+                                guesses: game.guesses
+                                    .map((guess) => guess.split(''))
+                                    .toList(),
+                                results: game.results,
+                                highContrast: settings.highContrastGame,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

@@ -20,52 +20,60 @@ class WordleGrid extends StatelessWidget {
         final availableWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.of(context).size.width;
-        final tileSize = ((availableWidth - 40) / 5).clamp(36.0, 50.0);
-        final spacing = tileSize >= 46 ? 5.0 : 3.0;
+        const spacing = 2.0;
+        final tileSize = ((availableWidth - (5 * 2 * spacing)) / 5)
+            .clamp(28.0, 48.0);
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(results.length, (row) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: spacing * 2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (col) {
-                  final letter = col < guesses[row].length
-                      ? guesses[row][col].toUpperCase()
-                      : '';
-                  final status = results[row][col];
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    margin: EdgeInsets.all(spacing),
-                    width: tileSize,
-                    height: tileSize,
-                    decoration: BoxDecoration(
-                      color: _getColor(status),
-                      border: Border.all(
-                        color: status == LetterStatus.initial
-                            ? Theme.of(context).colorScheme.outlineVariant
-                            : _getColor(status),
+        final gridWidth = (tileSize * 5) + (5 * 2 * spacing);
+
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          child: SizedBox(
+            width: gridWidth,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(results.length, (row) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(5, (col) {
+                    final letter = col < guesses[row].length
+                        ? guesses[row][col].toUpperCase()
+                        : '';
+                    final status = results[row][col];
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      margin: const EdgeInsets.all(spacing),
+                      width: tileSize,
+                      height: tileSize,
+                      decoration: BoxDecoration(
+                        color: _getColor(status),
+                        border: Border.all(
+                          color: status == LetterStatus.initial
+                              ? Theme.of(context).colorScheme.outlineVariant
+                              : _getColor(status),
+                        ),
+                        borderRadius: BorderRadius.circular(tileSize * 0.22),
                       ),
-                      borderRadius: BorderRadius.circular(tileSize * 0.24),
-                    ),
-                    child: Center(
-                      child: FittedBox(
-                        child: Text(
-                          letter,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
+                      child: Center(
+                        child: FittedBox(
+                          child: Text(
+                            letter,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
-              ),
-            );
-          }),
+                    );
+                  }),
+                );
+              }),
+            ),
+          ),
         );
       },
     );

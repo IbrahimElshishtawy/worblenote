@@ -23,24 +23,29 @@ class ProfileOverviewCard extends StatelessWidget {
         ? 'Member profile ready for your next update'
         : 'Joined ${DateFormat('MMM yyyy').format(joinedAt)}';
 
+    final cardBackground = LinearGradient(
+      colors: [
+        scheme.primaryContainer.withValues(alpha: 0.82),
+        scheme.surfaceContainerHighest.withValues(alpha: 0.94),
+        scheme.secondaryContainer.withValues(alpha: 0.80),
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
-        gradient: LinearGradient(
-          colors: [
-            scheme.primary,
-            scheme.primaryContainer,
-            scheme.secondary,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        gradient: cardBackground,
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.55),
         ),
         boxShadow: [
           BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.20),
-            blurRadius: 32,
-            offset: const Offset(0, 20),
+            color: scheme.shadow.withValues(alpha: 0.05),
+            blurRadius: 22,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -50,97 +55,121 @@ class ProfileOverviewCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 72,
-                height: 72,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: scheme.onPrimary.withValues(alpha: 0.16),
-                  border: Border.all(
-                    color: scheme.onPrimary.withValues(alpha: 0.30),
-                  ),
+                  borderRadius: BorderRadius.circular(999),
+                  color: scheme.surface.withValues(alpha: 0.45),
                 ),
-                alignment: Alignment.center,
                 child: Text(
-                  _initials(profile?.name ?? 'Guest User'),
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: scheme.onPrimary,
-                    fontWeight: FontWeight.w800,
+                  'Profile Overview',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profile?.name ?? 'Guest User',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: scheme.onPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      profile?.email ?? 'No email connected',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onPrimary.withValues(alpha: 0.88),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      joinedLabel,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onPrimary.withValues(alpha: 0.78),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const Spacer(),
               FilledButton.tonalIcon(
                 onPressed: onEdit,
                 style: FilledButton.styleFrom(
-                  backgroundColor: scheme.onPrimary.withValues(alpha: 0.14),
-                  foregroundColor: scheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  backgroundColor: scheme.surface.withValues(alpha: 0.58),
+                  foregroundColor: scheme.onSurface,
+                  textStyle: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                icon: const Icon(Icons.edit_outlined),
+                icon: const Icon(Icons.edit_outlined, size: 18),
                 label: const Text('Edit'),
               ),
             ],
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 18),
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: scheme.surface.withValues(alpha: 0.42),
+                    border: Border.all(
+                      color: scheme.outlineVariant.withValues(alpha: 0.45),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    _initials(profile?.name ?? 'Guest User'),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: scheme.onSurface,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  profile?.name ?? 'Guest User',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  profile?.email ?? 'No email connected',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  joinedLabel,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           Text(
             profile?.bio.trim().isNotEmpty == true
                 ? profile!.bio.trim()
                 : 'Build your identity here. Add a short bio and keep your progress visible across the app.',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: scheme.onPrimary.withValues(alpha: 0.92),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurface.withValues(alpha: 0.90),
               height: 1.45,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              color: scheme.onPrimary.withValues(alpha: 0.12),
+              color: scheme.surface.withValues(alpha: 0.46),
               border: Border.all(
-                color: scheme.onPrimary.withValues(alpha: 0.15),
+                color: scheme.outlineVariant.withValues(alpha: 0.40),
               ),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.schedule_rounded,
-                  color: scheme.onPrimary,
-                  size: 18,
+                  color: scheme.onSurface,
+                  size: 16,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     currentDateTime,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onPrimary,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

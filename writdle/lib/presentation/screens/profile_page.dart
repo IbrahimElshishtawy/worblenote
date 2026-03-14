@@ -33,6 +33,8 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const SizedBox.shrink(),
+        leadingWidth: 0,
         title: const Text('My Profile'),
         actions: [
           IconButton(
@@ -188,9 +190,9 @@ class _ResponsiveMetricGrid extends StatelessWidget {
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth >= 980
             ? 4
-            : constraints.maxWidth >= 640
+            : constraints.maxWidth >= 520
                 ? 2
-                : 1;
+                : 2;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -200,7 +202,11 @@ class _ResponsiveMetricGrid extends StatelessWidget {
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 14,
             crossAxisSpacing: 14,
-            childAspectRatio: crossAxisCount == 1 ? 2.35 : 1.05,
+            childAspectRatio: constraints.maxWidth >= 980
+                ? 1.05
+                : constraints.maxWidth >= 520
+                    ? 1.18
+                    : 1.12,
           ),
           itemBuilder: (context, index) {
             return _AnimatedSection(

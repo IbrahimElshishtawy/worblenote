@@ -35,7 +35,7 @@ class ProfileActivityPanel extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Tracked Activity',
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -60,7 +60,7 @@ class ProfileActivityPanel extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             'Everything you complete inside the app shows here as a quick profile timeline.',
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
               height: 1.4,
             ),
@@ -80,7 +80,7 @@ class ProfileActivityPanel extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'No tracked tasks yet. Finish a few tasks and your profile dashboard will start filling up.',
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodySmall,
                     ),
                   ),
                 ],
@@ -146,7 +146,7 @@ class _ActivityTile extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),

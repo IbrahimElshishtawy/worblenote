@@ -17,18 +17,27 @@ class _ActivityPageState extends State<ActivityPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
 
+  DateTime get _deviceNow => DateTime.now();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TasksCubit>().fetchTasks(DateFormatter.toDayKey(_selectedDay));
+      final today = _deviceNow;
+      _focusedDay = today;
+      _selectedDay = today;
+      context.read<TasksCubit>().fetchTasks(DateFormatter.toDayKey(today));
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Daily Activity')),
+      appBar: AppBar(
+        leading: const SizedBox.shrink(),
+        leadingWidth: 0,
+        title: const Text('Your Daily Activity'),
+      ),
       body: BlocBuilder<TasksCubit, TasksState>(
         builder: (context, state) {
           final totalTasks = state.tasks.length;
@@ -39,6 +48,10 @@ class _ActivityPageState extends State<ActivityPage> {
 
           return RefreshIndicator(
             onRefresh: () {
+              final refreshedNow = _deviceNow;
+              setState(() {
+                _focusedDay = refreshedNow;
+              });
               return context.read<TasksCubit>().fetchTasks(
                 DateFormatter.toDayKey(_selectedDay),
               );
@@ -76,6 +89,13 @@ class _ActivityPageState extends State<ActivityPage> {
                         Text(
                           'Daily Progress: $completedTasks / $totalTasks',
                           style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'All activity data and task changes are saved locally on this phone.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                         const SizedBox(height: 12),
                         LinearProgressIndicator(value: progress, minHeight: 10),

@@ -25,7 +25,7 @@ class HomeNavItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 260),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
                 ? scheme.primary.withValues(alpha: 0.14)
@@ -37,7 +37,7 @@ class HomeNavItem extends StatelessWidget {
             children: [
               AnimatedScale(
                 duration: const Duration(milliseconds: 220),
-                scale: isSelected ? 1.05 : 1,
+                scale: isSelected ? 1.0 : 1,
                 child: Icon(
                   tab.icon,
                   color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
@@ -46,7 +46,7 @@ class HomeNavItem extends StatelessWidget {
               const SizedBox(height: 4),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 220),
-                style: theme.textTheme.labelMedium!.copyWith(
+                style: theme.textTheme.labelSmall!.copyWith(
                   fontWeight: FontWeight.w700,
                   color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
                 ),
