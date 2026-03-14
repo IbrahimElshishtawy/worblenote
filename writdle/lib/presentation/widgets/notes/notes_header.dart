@@ -20,9 +20,9 @@ class NotesHeader extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: [
             scheme.primary.withValues(alpha: 0.92),
@@ -37,28 +37,28 @@ class NotesHeader extends StatelessWidget {
         children: [
           Text(
             'Your Notes',
-            style: theme.textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               color: scheme.onPrimary,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
-            'Saved locally on this phone and tied to your device date.',
-            style: theme.textTheme.bodySmall?.copyWith(
+            'Local notes by phone date.',
+            style: theme.textTheme.labelMedium?.copyWith(
               color: scheme.onPrimary.withValues(alpha: 0.86),
-              height: 1.35,
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
                     color: scheme.onPrimary.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     'Device local',
@@ -73,10 +73,10 @@ class NotesHeader extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
                     color: scheme.onPrimary.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     localTime,
@@ -90,29 +90,29 @@ class NotesHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               _DateArrowButton(icon: Icons.arrow_back_ios_new, onTap: onPrevious),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: scheme.onPrimary.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(
                     formattedDate,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: theme.textTheme.labelLarge?.copyWith(
                       color: scheme.onPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               _DateArrowButton(icon: Icons.arrow_forward_ios, onTap: onNext),
             ],
           ),
@@ -135,13 +135,13 @@ class _DateArrowButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
         child: Ink(
-        width: 42,
-        height: 42,
+        width: 38,
+        height: 38,
         decoration: BoxDecoration(
           color: scheme.onPrimary.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: scheme.onPrimary, size: 18),
+        child: Icon(icon, color: scheme.onPrimary, size: 16),
       ),
     );
   }

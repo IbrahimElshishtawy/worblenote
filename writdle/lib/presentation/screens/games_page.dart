@@ -36,6 +36,8 @@ class _WordlePageState extends State<WordlePage> {
     final settings = context.read<AppSettingsCubit>().state;
     await game.initGame(
       requireManualRestart: settings.requireManualGameRestart,
+      difficulty: settings.gameDifficulty,
+      cooldownHours: settings.gameCooldownHours,
     );
     if (game.gameEnded && game.cooldownLeft > Duration.zero) {
       game.updateCooldownTimer(
@@ -124,6 +126,8 @@ class _WordlePageState extends State<WordlePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        leading: const SizedBox.shrink(),
+        leadingWidth: 0,
         title: const Text('Wordle Game'),
         actions: [
           IconButton(

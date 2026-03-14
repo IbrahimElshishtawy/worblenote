@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:writdle/presentation/widgets/notes/note_color_palette.dart';
 
 class NoteEditorSheet extends StatelessWidget {
   const NoteEditorSheet({
     super.key,
     required this.titleController,
     required this.descriptionController,
+    required this.selectedColor,
+    required this.onColorSelected,
     required this.isEditing,
     required this.onSave,
   });
 
   final TextEditingController titleController;
   final TextEditingController descriptionController;
+  final int selectedColor;
+  final ValueChanged<int> onColorSelected;
   final bool isEditing;
   final VoidCallback onSave;
 
@@ -69,11 +74,19 @@ class NoteEditorSheet extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            NoteColorPalette(
+              selectedColor: selectedColor,
+              onColorSelected: onColorSelected,
+            ),
             const SizedBox(height: 18),
-            ElevatedButton.icon(
-              onPressed: onSave,
-              icon: const Icon(Icons.save_outlined),
-              label: Text(isEditing ? 'Save changes' : 'Add note'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onSave,
+                icon: const Icon(Icons.save_outlined),
+                label: Text(isEditing ? 'Save changes' : 'Add note'),
+              ),
             ),
           ],
         ),

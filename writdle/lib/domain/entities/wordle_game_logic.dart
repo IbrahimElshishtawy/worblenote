@@ -3,21 +3,21 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:writdle/domain/entities/word_generator_time.dart';
+import 'package:writdle/presentation/bloc/app_settings_cubit.dart';
 
 enum LetterStatus { correct, present, absent, initial }
 
 class WordleGameLogic {
-  WordleGameLogic()
-      : guesses = List.filled(4, ''),
-        results = List.generate(4, (_) => List.filled(5, LetterStatus.initial));
+  WordleGameLogic() {
+    _configureBoard(GameDifficulty.normal.attempts);
+  }
 
-  static const _stateKey = 'wordle_state_v2';
+  static const _stateKey = 'wordle_state_v3';
   static const _lastPlayedKey = 'wordle_last_played';
-  static const _cooldownHours = 12;
 
   late String correctWord;
-  final List<String> guesses;
-  final List<List<LetterStatus>> results;
+  late List<String> guesses;
+  late List<List<LetterStatus>> results;
   final Map<String, LetterStatus> keyStatus = {};
 
   int currentRow = 0;
@@ -26,12 +26,32 @@ class WordleGameLogic {
   Duration cooldownLeft = Duration.zero;
   Timer? timer;
   String? latestResultMessage;
+  int maxAttempts = GameDifficulty.normal.attempts;
+  int cooldownHours = 12;
+  GameDifficulty difficulty = GameDifficulty.normal;
 
   int _attemptResult = -1;
   int get resultAttempt => _attemptResult;
   bool get didWin => _attemptResult > 0;
 
-  Future<void> initGame({required bool requireManualRestart}) async {
+  void _configureBoard(int attempts) {
+    maxAttempts = attempts;
+    guesses = List.filled(attempts, '');
+    results = List.generate(
+      attempts,
+      (_) => List.filled(5, LetterStatus.initial),
+    );
+  }
+
+  Future<void> initGame({
+    required bool requireManualRestart,
+    required GameDifficulty difficulty,
+    required int cooldownHours,
+  }) async {
+    this.difficulty = difficulty;
+    this.cooldownHours = cooldownHours;
+    _configureBoard(difficulty.attempts);
+
     final prefs = await SharedPreferences.getInstance();
     final todayWord = WordGenerator.getWordOfTheDay();
     final rawState = prefs.getString(_stateKey);
@@ -39,7 +59,11 @@ class WordleGameLogic {
     if (rawState != null) {
       final decoded = jsonDecode(rawState) as Map<String, dynamic>;
       final savedWord = decoded['correctWord'] as String?;
-      if (savedWord == todayWord) {
+      final savedAttempts = decoded['maxAttempts'] as int?;
+      final savedCooldownHours = decoded['cooldownHours'] as int?;
+      if (savedWord == todayWord &&
+          savedAttempts == maxAttempts &&
+          savedCooldownHours == cooldownHours) {
         _restoreState(decoded);
         await _refreshCooldownState(requireManualRestart: requireManualRestart);
         return;
@@ -74,6 +98,7 @@ class WordleGameLogic {
   }
 
   Future<void> restartGame() async {
+    _configureBoard(difficulty.attempts);
     correctWord = WordGenerator.getWordOfTheDay();
     currentRow = 0;
     gameEnded = false;
@@ -82,11 +107,6 @@ class WordleGameLogic {
     latestResultMessage = null;
     _attemptResult = -1;
     keyStatus.clear();
-
-    for (var index = 0; index < guesses.length; index++) {
-      guesses[index] = '';
-      results[index] = List.filled(5, LetterStatus.initial);
-    }
 
     await _persistState();
   }
@@ -119,7 +139,7 @@ class WordleGameLogic {
   }
 
   Duration _remainingCooldown(int lastPlayed) {
-    final cooldown = const Duration(hours: _cooldownHours);
+    final cooldown = Duration(hours: cooldownHours);
     final playedAt = DateTime.fromMillisecondsSinceEpoch(lastPlayed);
     final endAt = playedAt.add(cooldown);
     final remaining = endAt.difference(DateTime.now());
@@ -256,7 +276,7 @@ class WordleGameLogic {
     _attemptResult = attempt;
     gameEnded = true;
     isReadyForManualRestart = false;
-    cooldownLeft = const Duration(hours: _cooldownHours);
+    cooldownLeft = Duration(hours: cooldownHours);
     await _persistState();
   }
 
@@ -276,6 +296,8 @@ class WordleGameLogic {
         'isReadyForManualRestart': isReadyForManualRestart,
         'attemptResult': _attemptResult,
         'latestResultMessage': latestResultMessage,
+        'maxAttempts': maxAttempts,
+        'cooldownHours': cooldownHours,
       }),
     );
   }

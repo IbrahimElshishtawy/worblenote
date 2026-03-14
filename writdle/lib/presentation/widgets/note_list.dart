@@ -20,6 +20,7 @@ class NoteList extends StatefulWidget {
 class _NoteListState extends State<NoteList> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
+  int _selectedColor = 0xFFFFF8E1;
 
   @override
   void initState() {
@@ -44,9 +45,15 @@ class _NoteListState extends State<NoteList> {
     super.dispose();
   }
 
-  Future<void> _openEditor({String? id, String? currentTitle, String? currentDesc}) async {
+  Future<void> _openEditor({
+    String? id,
+    String? currentTitle,
+    String? currentDesc,
+    int? currentColor,
+  }) async {
     _titleController.text = currentTitle ?? '';
     _descController.text = currentDesc ?? '';
+    _selectedColor = currentColor ?? 0xFFFFF8E1;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -55,42 +62,58 @@ class _NoteListState extends State<NoteList> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (_) => NoteEditorSheet(
-        titleController: _titleController,
-        descriptionController: _descController,
-        isEditing: id != null,
-        onSave: () async {
-          final title = _titleController.text.trim();
-          final description = _descController.text.trim();
-          if (title.isEmpty) {
-            context.read<AppNotificationCubit>().show(
-              'Please enter a note title.',
-              type: AppNotificationType.error,
-            );
-            return;
-          }
+      builder: (_) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return NoteEditorSheet(
+            titleController: _titleController,
+            descriptionController: _descController,
+            selectedColor: _selectedColor,
+            onColorSelected: (value) {
+              setModalState(() => _selectedColor = value);
+            },
+            isEditing: id != null,
+            onSave: () async {
+              final title = _titleController.text.trim();
+              final description = _descController.text.trim();
+              if (title.isEmpty) {
+                context.read<AppNotificationCubit>().show(
+                  'Please enter a note title.',
+                  type: AppNotificationType.error,
+                );
+                return;
+              }
 
-          if (id == null) {
-            await context.read<NotesCubit>().addNote(title, description, widget.date);
-            if (!mounted) {
-              return;
-            }
-            context.read<AppNotificationCubit>().show(
-              'Note saved successfully.',
-              type: AppNotificationType.success,
-            );
-          } else {
-            await context.read<NotesCubit>().updateNote(id, title, description, widget.date);
-            if (!mounted) {
-              return;
-            }
-            context.read<AppNotificationCubit>().show(
-              'Note updated successfully.',
-              type: AppNotificationType.success,
-            );
-          }
+              if (id == null) {
+                await context
+                    .read<NotesCubit>()
+                    .addNote(title, description, widget.date, _selectedColor);
+                if (!mounted) {
+                  return;
+                }
+                context.read<AppNotificationCubit>().show(
+                  'Note saved successfully.',
+                  type: AppNotificationType.success,
+                );
+              } else {
+                await context.read<NotesCubit>().updateNote(
+                  id,
+                  title,
+                  description,
+                  widget.date,
+                  _selectedColor,
+                );
+                if (!mounted) {
+                  return;
+                }
+                context.read<AppNotificationCubit>().show(
+                  'Note updated successfully.',
+                  type: AppNotificationType.success,
+                );
+              }
 
-          Navigator.pop(context);
+              Navigator.pop(context);
+            },
+          );
         },
       ),
     );
@@ -110,31 +133,6 @@ class _NoteListState extends State<NoteList> {
           children: [
             Column(
               children: [
-                if (state.isOfflineData)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFDE68A),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.phone_android_rounded, color: Color(0xFF92400E)),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'These notes are saved locally on this device.',
-                            style: TextStyle(
-                              color: Color(0xFF92400E),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 Expanded(
                   child: state.isLoading
                       ? const Center(child: CircularProgressIndicator())
@@ -151,6 +149,7 @@ class _NoteListState extends State<NoteList> {
                                     id: note.id,
                                     currentTitle: note.title,
                                     currentDesc: note.content,
+                                    currentColor: note.colorValue,
                                   ),
                                   onDelete: () async {
                                     await context.read<NotesCubit>().deleteNote(note.id, widget.date);

@@ -65,12 +65,18 @@ class NotesCubit extends Cubit<NotesState> {
     }
   }
 
-  Future<void> addNote(String title, String description, String date) async {
+  Future<void> addNote(
+    String title,
+    String description,
+    String date,
+    int colorValue,
+  ) async {
     final note = NoteModel(
       id: '',
       title: title,
       content: description,
       createdAt: DateTime.now(),
+      colorValue: colorValue,
     );
     await _repository.addNote(note, date);
     await fetchNotes(date);
@@ -81,12 +87,14 @@ class NotesCubit extends Cubit<NotesState> {
     String title,
     String description,
     String date,
+    int colorValue,
   ) async {
     final note = NoteModel(
       id: id,
       title: title,
       content: description,
       createdAt: DateTime.now(),
+      colorValue: colorValue,
     );
     await _repository.updateNote(note, date);
     await fetchNotes(date);

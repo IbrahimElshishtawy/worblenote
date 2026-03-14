@@ -81,19 +81,44 @@ class GameStatusPanel extends StatelessWidget {
                 ),
               ),
               if (competitiveMode)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: scheme.onPrimary.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    game.gameEnded ? 'FINAL' : 'RANKED',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: scheme.onPrimary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                    ),
+                InkWell(
+                  onTap: onStats,
+                  borderRadius: BorderRadius.circular(999),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: scheme.onPrimary.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          game.gameEnded ? 'FINAL' : 'RANKED',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: scheme.onPrimary,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: scheme.onPrimary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'STATE',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: scheme.onPrimary,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
             ],
@@ -123,7 +148,7 @@ class GameStatusPanel extends StatelessWidget {
               if (showAttemptBadge)
                 _InfoChip(
                   icon: Icons.grid_view_rounded,
-                  label: 'Attempt ${game.currentRow + 1}/4',
+                  label: 'Attempt ${game.currentRow + 1}/${game.maxAttempts}',
                   color: competitiveMode ? scheme.onPrimary : const Color(0xFF2563EB),
                   lightBackground: competitiveMode,
                 ),
@@ -136,39 +161,25 @@ class GameStatusPanel extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              OutlinedButton.icon(
-                onPressed: onStats,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: competitiveMode ? scheme.onPrimary : null,
-                  side: BorderSide(
-                    color: competitiveMode
-                        ? scheme.onPrimary.withValues(alpha: 0.40)
-                        : scheme.outline,
-                  ),
+          if (onRestart != null) ...[
+            const SizedBox(height: 14),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton.icon(
+                onPressed: onRestart,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: competitiveMode
+                      ? scheme.onPrimary
+                      : scheme.primary,
+                  foregroundColor: competitiveMode
+                      ? scheme.primary
+                      : scheme.onPrimary,
                 ),
-                icon: const Icon(Icons.bar_chart_rounded),
-                label: const Text('Stats'),
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Restart'),
               ),
-              const SizedBox(width: 10),
-              if (onRestart != null)
-                ElevatedButton.icon(
-                  onPressed: onRestart,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: competitiveMode
-                        ? scheme.onPrimary
-                        : scheme.primary,
-                    foregroundColor: competitiveMode
-                        ? scheme.primary
-                        : scheme.onPrimary,
-                  ),
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Restart'),
-                ),
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );

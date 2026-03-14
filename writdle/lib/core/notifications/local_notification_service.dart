@@ -6,6 +6,8 @@ class LocalNotificationService {
   LocalNotificationService._();
 
   static final LocalNotificationService instance = LocalNotificationService._();
+  static const int gameReminderNotificationId = 7001;
+
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
@@ -66,6 +68,18 @@ class LocalNotificationService {
     await _plugin.show(id, title, body, _details);
   }
 
+  Future<AndroidScheduleMode> _scheduleMode() async {
+    final androidImplementation = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final canScheduleExact =
+        await androidImplementation?.canScheduleExactNotifications() ?? false;
+    return canScheduleExact
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+  }
+
   Future<void> schedule({
     required int id,
     required String title,
@@ -76,23 +90,44 @@ class LocalNotificationService {
       return;
     }
 
-    final androidImplementation = _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    final canScheduleExact =
-        await androidImplementation?.canScheduleExactNotifications() ?? false;
-
     await _plugin.zonedSchedule(
       id,
       title,
       body,
       tz.TZDateTime.from(scheduledAt, tz.local),
       _details,
-      androidScheduleMode: canScheduleExact
-          ? AndroidScheduleMode.exactAllowWhileIdle
-          : AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: await _scheduleMode(),
       payload: 'task_reminder',
+    );
+  }
+
+  Future<void> scheduleDailyGameReminder({
+    required int hour,
+    required int minute,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledAt = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    if (scheduledAt.isBefore(now)) {
+      scheduledAt = scheduledAt.add(const Duration(days: 1));
+    }
+
+    await _plugin.zonedSchedule(
+      gameReminderNotificationId,
+      'Wordle Reminder',
+      'Your next game session is waiting. Open Writdle and play now.',
+      scheduledAt,
+      _details,
+      androidScheduleMode: await _scheduleMode(),
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: 'game_reminder',
     );
   }
 
