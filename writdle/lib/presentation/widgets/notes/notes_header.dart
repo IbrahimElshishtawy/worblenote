@@ -4,11 +4,13 @@ class NotesHeader extends StatelessWidget {
   const NotesHeader({
     super.key,
     required this.formattedDate,
+    required this.localTime,
     required this.onPrevious,
     required this.onNext,
   });
 
   final String formattedDate;
+  final String localTime;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
 
@@ -18,9 +20,9 @@ class NotesHeader extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
           colors: [
             scheme.primary.withValues(alpha: 0.92),
@@ -35,35 +37,75 @@ class NotesHeader extends StatelessWidget {
         children: [
           Text(
             'Your Notes',
-            style: theme.textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               color: scheme.onPrimary,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            'Capture your ideas, plans, and reflections with a cleaner writing space.',
-            style: theme.textTheme.bodyMedium?.copyWith(
+            'Saved locally on this phone and tied to your device date.',
+            style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onPrimary.withValues(alpha: 0.86),
-              height: 1.5,
+              height: 1.35,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: scheme.onPrimary.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    'Device local',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: scheme.onPrimary.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    localTime,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               _DateArrowButton(icon: Icons.arrow_back_ios_new, onTap: onPrevious),
               const SizedBox(width: 12),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: scheme.onPrimary.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
                     formattedDate,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: theme.textTheme.titleSmall?.copyWith(
                       color: scheme.onPrimary,
                       fontWeight: FontWeight.w700,
                     ),
@@ -92,12 +134,12 @@ class _DateArrowButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Ink(
-        width: 46,
-        height: 46,
+        child: Ink(
+        width: 42,
+        height: 42,
         decoration: BoxDecoration(
           color: scheme.onPrimary.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Icon(icon, color: scheme.onPrimary, size: 18),
       ),

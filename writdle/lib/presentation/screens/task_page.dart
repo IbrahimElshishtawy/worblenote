@@ -5,8 +5,11 @@ import 'package:writdle/core/notifications/app_notification_cubit.dart';
 import 'package:writdle/core/utils/date_formatter.dart';
 import 'package:writdle/domain/entities/task_model.dart';
 import 'package:writdle/presentation/bloc/tasks_cubit.dart';
-import 'package:writdle/presentation/widgets/task_card.dart';
+import 'package:writdle/presentation/widgets/tasks/task_item_card.dart';
 import 'package:writdle/presentation/widgets/tasks/task_editor_sheet.dart';
+import 'package:writdle/presentation/widgets/tasks/task_management_header.dart';
+import 'package:writdle/presentation/widgets/tasks/task_overview_cards.dart';
+import 'package:writdle/presentation/widgets/tasks/task_tasks_section.dart';
 
 class TasksPage extends StatefulWidget {
   const TasksPage({super.key, required this.selectedDay});
@@ -165,6 +168,14 @@ class _TasksPageState extends State<TasksPage> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: const Text('Manage Tasks'),
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          tooltip: 'Back to activity',
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -188,88 +199,9 @@ class _TasksPageState extends State<TasksPage> {
                   ListView(
                     padding: const EdgeInsets.fromLTRB(18, 16, 18, 120),
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          gradient: LinearGradient(
-                            colors: [scheme.primary, scheme.secondary],
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Task Planner',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    color: scheme.onPrimary,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Plan, track, remind, and complete your day with smart local notifications.',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: scheme.onPrimary.withValues(alpha: 0.86),
-                                    height: 1.45,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (state.isOfflineData) ...[
-                        const SizedBox(height: 14),
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFDE68A),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.cloud_off_rounded, color: Color(0xFF92400E)),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'You are viewing offline tasks. Reminders still work locally on the device.',
-                                  style: TextStyle(
-                                    color: Color(0xFF92400E),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      TaskManagementHeader(selectedDay: widget.selectedDay),
                       const SizedBox(height: 18),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _OverviewCard(
-                              label: 'Open',
-                              value: '${todo.length}',
-                              color: const Color(0xFFEA580C),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _OverviewCard(
-                              label: 'Done',
-                              value: '${done.length}',
-                              color: const Color(0xFF15803D),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _OverviewCard(
-                              label: 'Alerts',
-                              value: '${state.tasks.where((task) => task.hasReminder).length}',
-                              color: const Color(0xFF7C3AED),
-                            ),
-                          ),
-                        ],
-                      ),
+                      TaskOverviewCards(tasks: state.tasks),
                       const SizedBox(height: 22),
                       if (state.isLoading)
                         const Padding(
@@ -277,59 +209,64 @@ class _TasksPageState extends State<TasksPage> {
                           child: Center(child: CircularProgressIndicator()),
                         )
                       else ...[
-                        _SectionHeader(title: 'Current Tasks', count: todo.length),
-                        const SizedBox(height: 12),
-                        if (todo.isEmpty)
-                          const _EmptyTasksCard(
-                            message: 'No active tasks. Add one and schedule a reminder if you want.',
-                          )
-                        else
-                          ...todo.map(
-                            (task) => TaskCard(
-                              task: task,
-                              onToggle: () async {
-                                await context.read<TasksCubit>().toggleTaskCompletion(task, _dayKey);
-                                if (!mounted) {
-                                  return;
-                                }
-                                context.read<AppNotificationCubit>().show(
-                                  task.completed ? 'Task reopened.' : 'Task completed.',
-                                  type: AppNotificationType.success,
-                                );
-                              },
-                              onEdit: () => _openEditor(task),
-                              onDelete: () async {
-                                await context.read<TasksCubit>().deleteTask(task, _dayKey);
-                                if (!mounted) {
-                                  return;
-                                }
-                                context.read<AppNotificationCubit>().show(
-                                  'Task deleted.',
-                                  type: AppNotificationType.info,
-                                );
-                              },
-                            ),
-                          ),
+                        TaskTasksSection(
+                          title: 'Current Tasks',
+                          count: todo.length,
+                          emptyMessage:
+                              'No active tasks. Add one and schedule a reminder if you want.',
+                          children: todo
+                              .map(
+                                (task) => TaskItemCard(
+                                  task: task,
+                                  onToggle: () async {
+                                    await context
+                                        .read<TasksCubit>()
+                                        .toggleTaskCompletion(task, _dayKey);
+                                    if (!mounted) {
+                                      return;
+                                    }
+                                    context.read<AppNotificationCubit>().show(
+                                      task.completed ? 'Task reopened.' : 'Task completed.',
+                                      type: AppNotificationType.success,
+                                    );
+                                  },
+                                  onEdit: () => _openEditor(task),
+                                  onDelete: () async {
+                                    await context.read<TasksCubit>().deleteTask(task, _dayKey);
+                                    if (!mounted) {
+                                      return;
+                                    }
+                                    context.read<AppNotificationCubit>().show(
+                                      'Task deleted.',
+                                      type: AppNotificationType.info,
+                                    );
+                                  },
+                                ),
+                              )
+                              .toList(),
+                        ),
                         const SizedBox(height: 18),
-                        _SectionHeader(title: 'Completed Tasks', count: done.length),
-                        const SizedBox(height: 12),
-                        if (done.isEmpty)
-                          const _EmptyTasksCard(
-                            message: 'Completed tasks will appear here as you make progress.',
-                          )
-                        else
-                          ...done.map(
-                            (task) => TaskCard(
-                              task: task,
-                              onToggle: () async {
-                                await context.read<TasksCubit>().toggleTaskCompletion(task, _dayKey);
-                              },
-                              onEdit: () => _openEditor(task),
-                              onDelete: () async {
-                                await context.read<TasksCubit>().deleteTask(task, _dayKey);
-                              },
-                            ),
-                          ),
+                        TaskTasksSection(
+                          title: 'Completed Tasks',
+                          count: done.length,
+                          emptyMessage: 'Completed tasks will appear here as you make progress.',
+                          children: done
+                              .map(
+                                (task) => TaskItemCard(
+                                  task: task,
+                                  onToggle: () async {
+                                    await context
+                                        .read<TasksCubit>()
+                                        .toggleTaskCompletion(task, _dayKey);
+                                  },
+                                  onEdit: () => _openEditor(task),
+                                  onDelete: () async {
+                                    await context.read<TasksCubit>().deleteTask(task, _dayKey);
+                                  },
+                                ),
+                              )
+                              .toList(),
+                        ),
                       ],
                     ],
                   ),
@@ -347,93 +284,6 @@ class _TasksPageState extends State<TasksPage> {
             },
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _OverviewCard extends StatelessWidget {
-  const _OverviewCard({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(label),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.count});
-
-  final String title;
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-        const Spacer(),
-        Text(
-          '$count',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-        ),
-      ],
-    );
-  }
-}
-
-class _EmptyTasksCard extends StatelessWidget {
-  const _EmptyTasksCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Text(
-        message,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
       ),
     );
   }

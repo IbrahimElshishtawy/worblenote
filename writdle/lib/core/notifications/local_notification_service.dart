@@ -22,11 +22,18 @@ class LocalNotificationService {
 
     await _plugin.initialize(settings);
 
-    await _plugin
+    final androidImplementation = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+        >();
+
+    await androidImplementation?.requestNotificationsPermission();
+    final canScheduleExact =
+        await androidImplementation?.canScheduleExactNotifications() ?? false;
+    if (!canScheduleExact) {
+      await androidImplementation?.requestExactAlarmsPermission();
+    }
+
     await _plugin
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
@@ -69,13 +76,22 @@ class LocalNotificationService {
       return;
     }
 
+    final androidImplementation = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final canScheduleExact =
+        await androidImplementation?.canScheduleExactNotifications() ?? false;
+
     await _plugin.zonedSchedule(
       id,
       title,
       body,
       tz.TZDateTime.from(scheduledAt, tz.local),
       _details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: canScheduleExact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
       payload: 'task_reminder',
     );
   }

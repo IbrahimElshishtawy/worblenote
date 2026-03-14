@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:writdle/domain/entities/task_model.dart';
+import 'package:writdle/presentation/widgets/tasks/task_editor_intro.dart';
+import 'package:writdle/presentation/widgets/tasks/task_reminder_card.dart';
 
 class TaskEditorSheet extends StatelessWidget {
   const TaskEditorSheet({
@@ -46,21 +48,7 @@ class TaskEditorSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 46,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              isEditing ? 'Edit Task' : 'Create Task',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-            ),
+            TaskEditorIntro(isEditing: isEditing),
             const SizedBox(height: 18),
             TextField(
               controller: titleController,
@@ -121,43 +109,20 @@ class TaskEditorSheet extends StatelessWidget {
               },
             ),
             const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Reminder'),
-                        const SizedBox(height: 6),
-                        Text(reminderText),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: onPickReminder,
-                    icon: const Icon(Icons.notifications_active_outlined),
-                  ),
-                  if (reminderAt != null)
-                    IconButton(
-                      onPressed: onClearReminder,
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                ],
-              ),
+            TaskReminderCard(
+              reminderText: reminderText,
+              onPickReminder: onPickReminder,
+              onClearReminder: onClearReminder,
+              hasReminder: reminderAt != null,
             ),
             const SizedBox(height: 18),
-            ElevatedButton.icon(
-              onPressed: onSave,
-              icon: const Icon(Icons.save_outlined),
-              label: Text(isEditing ? 'Save task' : 'Add task'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onSave,
+                icon: const Icon(Icons.save_outlined),
+                label: Text(isEditing ? 'Save task' : 'Add task'),
+              ),
             ),
           ],
         ),

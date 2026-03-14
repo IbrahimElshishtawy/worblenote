@@ -121,11 +121,11 @@ class _NoteListState extends State<NoteList> {
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.cloud_off_rounded, color: Color(0xFF92400E)),
+                        Icon(Icons.phone_android_rounded, color: Color(0xFF92400E)),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Showing offline notes. Changes will sync when the connection is back.',
+                            'These notes are saved locally on this device.',
                             style: TextStyle(
                               color: Color(0xFF92400E),
                               fontWeight: FontWeight.w600,

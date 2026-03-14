@@ -34,6 +34,7 @@ class _NotesPageState extends State<NotesPage> {
       '${_selectedDate.year.toString().padLeft(4, '0')}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
 
   String get _displayDate => DateFormat('EEEE, d MMMM yyyy').format(_selectedDate);
+  String get _deviceTime => DateFormat('hh:mm a').format(DateTime.now());
 
   void _goToPreviousDay() {
     setState(() {
@@ -72,6 +73,7 @@ class _NotesPageState extends State<NotesPage> {
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
                 child: NotesHeader(
                   formattedDate: _displayDate,
+                  localTime: _deviceTime,
                   onPrevious: _goToPreviousDay,
                   onNext: _goToNextDay,
                 ),
