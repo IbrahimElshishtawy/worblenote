@@ -12,9 +12,9 @@ Notes · Tasks · Wordle Game · Bilingual · Local Notifications · Profile Per
 
 <br/>
 
-[![Download APK](https://github.com/IbrahimElshishtawy/worblenote/releases/download/writdle/writdle.apk)
-&nbsp;&nbsp;
-[![View Releases](https://img.shields.io/badge/View-Releases-blue?style=for-the-badge&logo=github)](https://github.com/YOUR_USERNAME/writdle-v2/releases)
+[![Download APK](https://img.shields.io/badge/⬇️%20Download%20APK-4CAF50?style=for-the-badge&logo=android&logoColor=white)](https://github.com/IbrahimElshishtawy/worblenote/releases/download/writdle/writdle.apk)
+&nbsp;
+[![View Releases](https://img.shields.io/badge/📦%20View%20Releases-1976D2?style=for-the-badge&logo=github&logoColor=white)](https://github.com/IbrahimElshishtawy/worblenote/releases)
 
 </div>
 
@@ -37,42 +37,52 @@ This version focuses on delivering a production-quality experience:
 
 ## Features
 
-### Productivity
+<table>
+  <tr>
+    <td valign="top" width="50%">
+
+### 📝 Productivity
 - Create and manage **notes** with a clean editor
 - Organize **daily tasks** and track progress by date
 - Edit your personal local profile
 
-### Wordle Game
+### 🟩 Wordle Game
 - Daily Wordle-style gameplay
 - Adjustable difficulty and cooldown timing
 - Manual restart and competitive layout options
 - High contrast mode and gameplay hints
 
-### Local Experience
-- All data stored locally on your device
-- Notes, tasks, stats, and profile — no account needed
-- Local notifications for daily game reminders and task alerts
+    </td>
+    <td valign="top" width="50%">
 
-### Personalization
+### 💾 Local Experience
+- All data stored locally — no account needed
+- Notes, tasks, stats, and profile on-device
+- Notifications for daily reminders and task alerts
+
+### 🎨 Personalization
 - Light and dark theme support
-- Text scaling
-- Reduced motion mode
+- Text scaling and reduced motion mode
 - Arabic / English language switch
+
+    </td>
+  </tr>
+</table>
 
 ---
 
 ## Screens
 
-| Home Dashboard | Wordle Game | Notes | Activity |
-|:-:|:-:|:-:|:-:|
-| Profile | Settings | Stats Sheet | Task Editor |
+| Home Dashboard | Wordle Game | Notes | Activity | Settings |
+|:-:|:-:|:-:|:-:|:-:|
+| ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
+|:--|:--|
 | Framework | Flutter + Dart |
 | State Management | flutter_bloc |
 | Persistence | shared_preferences |
@@ -85,41 +95,32 @@ This version focuses on delivering a production-quality experience:
 
 ## Download & Install
 
-### Android (Direct APK)
+### Android
 
-1. Go to the **[Releases](https://github.com/YOUR_USERNAME/writdle-v2/releases/latest)** page
-2. Download the latest `app-release.apk`
-3. Open the file on your Android device
-4. If prompted, enable **Install unknown apps** in your device settings
-5. Install and enjoy
+> **Requirements:** Android 6.0 (Marshmallow) or higher
 
-> **Note:** Writdle V2 is currently available for Android only.
+1. Tap the **Download APK** button above
+2. Open the downloaded `.apk` file on your device
+3. If prompted, enable **Install unknown apps** in your settings
+4. Install and enjoy ✅
 
----
-
-## Project Structure
-
-```
-lib/
-├─ core/
-├─ data/
-├─ domain/
-├─ presentation/
-│  ├─ bloc/
-│  ├─ screens/
-│  └─ widgets/
-└─ main.dart
-```
+> Writdle V2 is currently available for **Android only**.
 
 ---
 
 ## Author
 
+<div align="center">
+
 **Developed by Ibrahim Elshishtawy**
+
+[![GitHub](https://img.shields.io/badge/GitHub-IbrahimElshishtawy-181717?style=flat-square&logo=github)](https://github.com/IbrahimElshishtawy)
+
+</div>
 
 ---
 
 ## License
 
 This project is for personal and portfolio use.
-You may view the source for reference but redistribution or commercial use is not permitted without explicit permission.
+You may view the source for reference, but redistribution or commercial use is not permitted without explicit permission.
